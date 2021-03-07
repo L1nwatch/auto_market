@@ -7,14 +7,10 @@ import time
 import requests
 import re
 import easyquotation
-import easytrader
+# import easytrader
 import baostock as bs
 import pandas as pd
 
-
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 __author__ = '__L1n__w@tch'
 
