@@ -19,15 +19,23 @@ logger = logging.getLogger('log')
 logger.setLevel(logging.DEBUG)
 root_path = "log/{}".format(today)
 os.makedirs(root_path, exist_ok=True)
-path = os.path.join(root_path, '{}.log'.format(os.path.basename(__file__)))
 
 # 文件日志
+path = os.path.join(root_path, '{}.log'.format(os.path.basename(__file__)))
 fh = logging.FileHandler(path, encoding='utf-8', mode='a')
 fh.setLevel(logging.INFO)
 formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(message)s',
                               datefmt='%Y-%m-%d_%I:%M:%S_%p')
 fh.setFormatter(formatter)
 logger.addHandler(fh)
+
+# 重要文件日志
+dl = logging.FileHandler(os.path.join(root_path, "deal.log"), encoding='utf-8', mode='a')
+dl.setLevel(logging.CRITICAL)
+formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(message)s',
+                              datefmt='%Y-%m-%d_%I:%M:%S_%p')
+dl.setFormatter(formatter)
+logger.addHandler(dl)
 
 # 控制台日志
 formatter = logging.Formatter('[%(levelname)s]：%(message)s')
@@ -85,6 +93,8 @@ def set_sell_cmd(client, code, price, *, amount=100, stock_info=None):
     else:
         response = client.sell(code, price=price, amount=100)
         logger.warning("股票：{}，以期望卖出价格{}进行了委托".format(code, price))
+        logger.critical("目前资产情况为：{}".format(get_balance(client)))
+        logger.critical("目前持仓情况为：{}".format(get_position(client)))
         return response
 
 
@@ -103,7 +113,9 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
         logger.error("股票：{}，期望买入价格{}，总共需要{}超出目前可用余额{}，无法交易".format(code, price, total_cost, count_info["可用金额"]))
     else:
         response = client.buy(code, price=price, amount=100)
-        logger.warning("股票：{}，以期望买入价格{}进行了委托，总共消耗金额{}".format(code, price, total_cost))
+        logger.critical("股票：{}，以期望买入价格{}进行了委托，总共消耗金额{}".format(code, price, total_cost))
+        logger.critical("目前资产情况为：{}".format(get_balance(client)))
+        logger.critical("目前持仓情况为：{}".format(get_position(client)))
         return response
 
 
