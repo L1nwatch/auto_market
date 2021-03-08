@@ -30,6 +30,12 @@ formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(me
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+# 关键文件日志
+i_fh = logging.FileHandler(path, encoding='utf-8', mode='a')
+i_fh.setLevel(logging.CRITICAL)
+i_fh.setFormatter(formatter)
+logger.addHandler(i_fh)
+
 # 控制台日志
 formatter = logging.Formatter('[%(levelname)s]：%(message)s')
 ch = logging.StreamHandler(sys.stdout)
@@ -130,7 +136,12 @@ def get_price_info_with_stock_number(stock_list):
     """
     result = list()
     for i, each_stock in enumerate(stock_list):
-        data = tushare.get_hist_data(each_stock)
+        logger.debug("获取股票代码：{} 近期的价格信息".format(each_stock))
+        try:
+            data = tushare.get_hist_data(each_stock)
+        except Exception as e:
+            logger.error("股票代码：{} 获取失败，直接跳过了".format(each_stock))
+            continue
         high_price = data.iloc[:100].loc[:, "high"].max()
         low_price = data.iloc[:100].loc[:, "low"].min()
         cur_price = data.iloc[0, 2]
@@ -176,19 +187,20 @@ def get_decision():
     # 准备工作
     lq = prepare()
 
-    logger.critical("{sep} 获取所有近期有公告的股票代码 {sep}".format(sep="=" * 30))
+    logger.info("{sep} 获取所有近期有公告的股票代码 {sep}".format(sep="=" * 30))
     all_code = get_stock_number_with_condition()
     with open(os.path.join(root_path, "result.json"), "r", encoding="utf8") as f:
         all_code = simplejson.load(f)
 
-    logger.critical("{sep} 获取股票代码对应的，近期的最高最低价格 {sep}".format(sep="=" * 30))
+    logger.info("{sep} 获取股票代码对应的，近期的最高最低价格 {sep}".format(sep="=" * 30))
     all_price = get_price_info_with_stock_number(all_code)
 
-    logger.critical("{sep} 得出最终的决策 {sep}".format(sep="=" * 30))
+    logger.info("{sep} 得出最终的决策 {sep}".format(sep="=" * 30))
     with open(os.path.join(root_path, "low_result.json"), "r", encoding="utf8") as f:
         all_price = simplejson.load(f)
     final_answer = get_final_answer(all_price)
     message = "推荐股票/买价/卖价：{}/{}/{}".format(final_answer["code"], final_answer["buy"], final_answer["sell"])
+    logger.critical("{sep} 今天的日期为：{today_date} {sep}".format(sep="=" * 30, today_date=today))
     logger.critical("{sep} {message} {sep}".format(sep="=" * 30, message=message))
     logger.critical("全部信息：{message}".format(sep="=" * 30, message=final_answer))
     with open(os.path.join(root_path, "final_answer.json"), mode="w", encoding="utf8") as f:
