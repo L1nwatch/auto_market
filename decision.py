@@ -71,6 +71,9 @@ def get_market_snapshot():
         if "ST" in each_stock_info["name"].upper():
             logger.debug("跳过ST股票：{}".format(each_stock_info))
             continue
+        if each_stock_info["now"] > 48:
+            logger.debug("跳过价格超过 48 的股票：{}".format(each_stock_info))
+            continue
         result.append(each_stock_code)
     logger.info("总共得到 {} 个股票代码".format(len(result)))
     return result
@@ -102,8 +105,6 @@ def get_report(stock_number):
         return True
     else:
         return False
-
-
 
 
 def get_stock_number_with_condition():
