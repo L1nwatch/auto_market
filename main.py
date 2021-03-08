@@ -70,16 +70,17 @@ def get_position(client):
     :return:
     """
     logger.debug("获取当前持仓情况")
-    try:
-        result = client.position
-    except Exception as e:
-        logger.error("API 调用失败，无法获取当前持仓情况：{}".format(e))
-    while len(result) <= 0:
-        logger.error("持仓情况获取失败：{}".format(result))
-        login_system()
-        time.sleep(10)
-        result = client.position
-    return result
+    while True:
+        try:
+            result = client.position
+            while len(result) <= 0:
+                logger.error("持仓情况获取失败：{}".format(result))
+                login_system()
+                time.sleep(10)
+                result = client.position
+            return result
+        except Exception as e:
+            logger.error("API 调用失败，无法获取当前持仓情况：{}".format(e))
 
 
 def set_sell_cmd(client, code, price, *, amount=100, stock_info=None):
