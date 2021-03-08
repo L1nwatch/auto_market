@@ -54,13 +54,16 @@ def get_balance(client):
     :return:
     """
     logger.debug("获取当前资金情况")
-    result = client.balance
-    while len(result) <= 0:
-        time.sleep(10)
-        logger.error("资金情况获取失败：{}".format(result))
-        result = client.balance
-
-    return result
+    while True:
+        try:
+            result = client.balance
+            while len(result) <= 0:
+                time.sleep(10)
+                logger.error("资金情况获取失败：{}".format(result))
+                result = client.balance
+            return result
+        except Exception as e:
+            logger.error("API 调用失败，无法获取当前资金情况：{}".format(e))
 
 
 def get_position(client):
