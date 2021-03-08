@@ -59,16 +59,19 @@ def get_market_snapshot():
     result = list()
     quotation = easyquotation.use('sina')  # 新浪 ['sina'] 腾讯 ['tencent', 'qq']
     logger.info("过滤创业板代码")
-
+    stock_list = list()
     for each_stock in quotation.market_snapshot(prefix=True):
         if each_stock.startswith("sz300"):
             logger.debug("跳过创业板股票代码：{}".format(each_stock))
             continue
-        stock_info = quotation.real(each_stock, prefix=True)
-        if "ST" in stock_info[each_stock]["name"].upper():
-            logger.debug("跳过ST股票：{}".format(stock_info[each_stock]))
+        stock_list.append(each_stock)
+
+    stock_info = quotation.real(stock_list, prefix=True)
+    for each_stock_code, each_stock_info in stock_info.items():
+        if "ST" in each_stock_info["name"].upper():
+            logger.debug("跳过ST股票：{}".format(each_stock_info))
             continue
-        result.append(each_stock)
+        result.append(each_stock_code)
     logger.info("总共得到 {} 个股票代码".format(len(result)))
     return result
 
@@ -87,15 +90,20 @@ def get_report(stock_number):
     end_date = end_date.strftime("%Y-%m-%d")
     start_date = start_date.strftime("%Y-%m-%d")
     rs_forecast = bs.query_forecast_report(stock_number, start_date=start_date, end_date=end_date)
-    rs_forecast.get_row_data()
-    rs_forecast_list = []
-    while (rs_forecast.error_code == '0') & rs_forecast.next():
-        # 分页查询，将每页信息合并在一起
-        rs_forecast_list.append(rs_forecast.get_row_data())
-    result_forecast = pd.DataFrame(rs_forecast_list, columns=rs_forecast.fields)
-    result = result_forecast.to_dict()
-    logger.debug("股票：{}，近期的公告为：{}".format(stock_number, result))
-    return result
+    # rs_forecast_list = []
+    # while (rs_forecast.error_code == '0') & rs_forecast.next():
+    #     分页查询，将每页信息合并在一起
+    # rs_forecast_list.append(rs_forecast.get_row_data())
+    # result_forecast = pd.DataFrame(rs_forecast_list, columns=rs_forecast.fields)
+    # result = result_forecast.to_dict()
+    # logger.debug("股票：{}，近期的公告为：{}".format(stock_number, result))
+    # return result
+    if len(rs_forecast.get_row_data()) > 0:
+        return True
+    else:
+        return False
+
+
 
 
 def get_stock_number_with_condition():
@@ -115,7 +123,7 @@ def get_stock_number_with_condition():
             logger.debug("统计到第 {} 只股票".format(i))
         logger.debug("获取股票代码：{} 近期的公告信息".format(each_stock))
         report = get_report(each_stock)
-        if len(report["code"]) <= 0:
+        if not report:
             logger.debug("股票代码：{} 近期没有公告".format(each_stock))
             continue
         report_list.append(report)
