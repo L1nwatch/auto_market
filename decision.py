@@ -56,6 +56,11 @@ def get_market_snapshot():
 
     for each_stock in quotation.market_snapshot(prefix=True):
         if each_stock.startswith("sz300"):
+            logger.debug("跳过创业板股票代码：{}".format(each_stock))
+            continue
+        stock_info = quotation.real(each_stock, prefix=True)
+        if "ST" in stock_info[each_stock]["name"].upper():
+            logger.debug("跳过ST股票：{}".format(stock_info[each_stock]))
             continue
         result.append(each_stock)
     logger.info("总共得到 {} 个股票代码".format(len(result)))
