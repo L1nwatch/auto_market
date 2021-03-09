@@ -116,20 +116,29 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
     if total_cost >= count_info["可用金额"]:
         logger.error("股票：{}，期望买入价格{}，总共需要{}超出目前可用余额{}，无法交易".format(code, price, total_cost, count_info["可用金额"]))
     else:
-        response = client.buy(code, price=price, amount=100)
-        logger.critical("股票：{}，以期望买入价格{}进行了委托，总共消耗金额{}".format(code, price, total_cost))
-        logger.critical("目前资产情况为：{}".format(get_balance(client)))
-        logger.critical("目前持仓情况为：{}".format(get_position(client)))
-        return response
+        try:
+            response = client.buy(code, price=price, amount=100)
+            logger.critical("股票：{}，以期望买入价格{}进行了委托，总共消耗金额{}".format(code, price, total_cost))
+            logger.critical("目前资产情况为：{}".format(get_balance(client)))
+            logger.critical("目前持仓情况为：{}".format(get_position(client)))
+            return response
+        except Exception as e:
+            logger.error("无法完成购买：{}".format(e))
 
 
-def auto_market(client):
-    """
-    自动交易
-    :return:
-    """
-    # 获取当天的决策信息
-    logger.info("获取日期 {} 的决策信息".format(today))
+def get_today_entrusts(client):
+    logger.debug("获取当日委托情况")
+    while True:
+        try:
+            result = client.today_entrusts
+            return result
+        except Exception as e:
+            logger.error("API 调用失败，无法获取当前委托情况：{}".format(e))
+            login_system()
+            time.sleep(10)
+
+
+def get_today_decision(client):
     final_answer_path = os.path.join(root_path, "final_answer.json")
     if not os.path.exists(final_answer_path):
         import decision
@@ -137,14 +146,43 @@ def auto_market(client):
     with open(final_answer_path, "r") as f:
         final_answer = simplejson.load(f)
 
-    # 观察目前的情况
     balance = get_balance(client)
     logger.warning("日期 {} 的资金情况为：{}".format(today, balance))
     position = get_position(client)
     logger.warning("日期 {} 的持仓情况为：{}".format(today, position))
+    return final_answer, position, balance
 
-    logger.warning("所有股票以成本价 * 1.03 卖出，并检查是否已买了决策里的股票")
+
+def set_sell_stop_cmd(client, position):
+    """
+    卖出所有需要止损的股票
+    :param client:
+    :return:
+    """
+    # TODO：检查之前是否已设置过 1.03 止损的委托
+    logger.info("观察持仓情况里，哪些需要卖出的")
+    for each_keep in position:
+        if each_keep["证券代码"] != "600271":
+            logger.debug("跳过 航天信息 股")
+        sell_price = round(each_keep["参考成本价"] * 0.8, 2)
+        if each_keep["当前价"] < sell_price:
+            logger.warning("【止损】股票代码：{}，按照成本价：{} 乘以 0.8 后得到的价格委托卖出：{}".format(
+                each_keep["证券代码"], each_keep["参考成本价"], sell_price))
+            set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep)
+        else:
+            logger.info("股票代码：{}，止损价格为{}，目前价格{}还不需要止损".format(each_keep["证券代码"], sell_price, each_keep["当前价"]))
+
+
+def set_sell_earn_cmd(client, position, final_answer):
+    """
+    按照预期赚钱的价格进行售出
+    :param client:
+    :return:
+    """
+
     done_final_answer = False
+    has_set_buy_cmd = False
+
     for each_keep in position:
         if each_keep["证券代码"] == final_answer["code"]:
             done_final_answer = True
@@ -152,11 +190,34 @@ def auto_market(client):
         logger.warning("股票代码：{}，按照成本价：{} 乘以 1.03 后得到的价格委托卖出：{}".format(
             each_keep["证券代码"], each_keep["参考成本价"], sell_price))
         set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep)
+
     if not done_final_answer:
+        logger.info("检查是否已提交委托")
+        today_entrusts = get_today_entrusts(client)
+        if len(today_entrusts) > 0:
+            logger.info("已设置委托")
+            has_set_buy_cmd = True
+    return done_final_answer, has_set_buy_cmd
+
+
+def auto_market(client):
+    """
+    自动交易
+    :return:
+    """
+    logger.info("获取日期 {} 的决策信息".format(today))
+    final_answer, position, balance = get_today_decision(client)
+
+    logger.info("卖出所有需要止损的股票")
+    set_sell_stop_cmd(client, position)
+
+    logger.info("所有股票以成本价 * 1.03 卖出，并检查是否已买了决策里的股票")
+    done_final_answer, has_set_buy_cmd = set_sell_earn_cmd(client, position, final_answer)
+
+    if not done_final_answer and not has_set_buy_cmd:
         logger.warning("按照决策，委托以 {} 的价格购买股票：{}".format(final_answer["buy"], final_answer["code"]))
         set_buy_cmd(client, final_answer["code"], final_answer["buy"], count_info=balance)
     # print(user.today_trades)
-    # print(user.today_entrusts)
 
 
 def login_system():
