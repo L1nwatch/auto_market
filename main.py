@@ -76,7 +76,7 @@ def get_position(client):
     while True:
         try:
             result = client.position
-            while len(result) <= 0:
+            while len(result) <= 0 or "参考成本价" not in result[0]:
                 logger.error("持仓情况获取失败：{}".format(result))
                 login_system()
                 time.sleep(10)
@@ -130,7 +130,12 @@ def get_today_entrusts(client):
     logger.debug("获取当日委托情况")
     while True:
         try:
-            result = client.today_entrusts
+            result = list()
+            today_entrusts = client.today_entrusts
+            for each_entrust in today_entrusts:
+                if each_entrust["备注"] != "全部撤单":
+                    logger.info("委托：{} 全部撤单了".format(each_entrust))
+                    result.append(each_entrust)
             return result
         except Exception as e:
             logger.error("API 调用失败，无法获取当前委托情况：{}".format(e))
