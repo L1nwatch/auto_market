@@ -3,13 +3,13 @@
 # version: Python3.X
 """ 主进程，执行循环监控
 """
-import time
-import easytrader
 import datetime
-import os
 import logging
+import os
 import sys
+import time
 
+import easytrader
 import simplejson
 
 today = datetime.datetime.today()
@@ -91,6 +91,7 @@ def set_sell_cmd(client, code, price, *, amount=100, stock_info=None):
     设置卖出委托
     :return:
     """
+    # TODO：检查可用状态，是否已冻结
     sell_top_price = round(stock_info["当前价"] * 1.1, 2)
     if sell_top_price < price:
         logger.error("股票：{}，期望卖出价格{}超出当天最高价{}，无法交易".format(code, price, sell_top_price))
@@ -184,7 +185,6 @@ def set_sell_earn_cmd(client, position, final_answer):
     :param client:
     :return:
     """
-
     done_final_answer = False
     has_set_buy_cmd = False
 
@@ -220,9 +220,8 @@ def auto_market(client):
     done_final_answer, has_set_buy_cmd = set_sell_earn_cmd(client, position, final_answer)
 
     if not done_final_answer and not has_set_buy_cmd:
-        logger.warning("按照决策，委托以 {} 的价格购买股票：{}".format(final_answer["buy"], final_answer["code"]))
+        logger.info("按照决策，委托以 {} 的价格购买股票：{}".format(final_answer["buy"], final_answer["code"]))
         set_buy_cmd(client, final_answer["code"], final_answer["buy"], count_info=balance)
-    # print(user.today_trades)
 
 
 def login_system():
@@ -258,9 +257,13 @@ def main_loop():
 
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
-        logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
-        auto_market(client)
-        time.sleep(10)
+        try:
+            logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
+            auto_market(client)
+        except Exception as e:
+            logging.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
+        finally:
+            time.sleep(10)
 
 
 if __name__ == "__main__":
