@@ -211,14 +211,13 @@ def auto_market(client):
     :return:
     """
     logger.info("获取日期 {} 的决策信息".format(today))
+
     final_answer, position, balance = get_today_decision(client)
-
-    logger.info("卖出所有需要止损的股票")
-    set_sell_stop_cmd(client, position)
-
     logger.info("所有股票以成本价 * 1.03 卖出，并检查是否已买了决策里的股票")
     done_final_answer, has_set_buy_cmd = set_sell_earn_cmd(client, position, final_answer)
 
+    logger.info("卖出所有需要止损的股票")
+    set_sell_stop_cmd(client, position)
     if not done_final_answer and not has_set_buy_cmd:
         logger.info("按照决策，委托以 {} 的价格购买股票：{}".format(final_answer["buy"], final_answer["code"]))
         set_buy_cmd(client, final_answer["code"], final_answer["buy"], count_info=balance)
