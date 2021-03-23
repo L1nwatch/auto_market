@@ -91,10 +91,11 @@ def set_sell_cmd(client, code, price, *, amount=100, stock_info=None):
     设置卖出委托
     :return:
     """
-    # TODO：检查可用状态，是否已冻结
     sell_top_price = round(stock_info["当前价"] * 1.1, 2)
     if sell_top_price < price:
         logger.error("股票：{}，期望卖出价格{}超出当天最高价{}，无法交易".format(code, price, sell_top_price))
+    elif stock_info["可用数量"] == 0:
+        logger.error("股票：{} 可用数量为 0，无法交易".format(code))
     else:
         response = client.sell(code, price=price, amount=100)
         logger.warning("股票：{}，以期望卖出价格{}进行了委托".format(code, price))
