@@ -12,39 +12,10 @@ import time
 import easytrader
 import simplejson
 
-today = datetime.datetime.today()
-today = today.strftime("%Y-%m-%d")
-
-logger = logging.getLogger('log')
-logger.setLevel(logging.DEBUG)
-root_path = "log/{}".format(today)
-os.makedirs(root_path, exist_ok=True)
-
-# 文件日志
-path = os.path.join(root_path, '{}.log'.format(os.path.basename(__file__)))
-fh = logging.FileHandler(path, encoding='utf-8', mode='a')
-fh.setLevel(logging.INFO)
-formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(message)s',
-                              datefmt='%Y-%m-%d_%I:%M:%S_%p')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
-# 重要文件日志
-dl = logging.FileHandler(os.path.join(root_path, "deal.log"), encoding='utf-8', mode='a')
-dl.setLevel(logging.CRITICAL)
-formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(message)s',
-                              datefmt='%Y-%m-%d_%I:%M:%S_%p')
-dl.setFormatter(formatter)
-logger.addHandler(dl)
-
-# 控制台日志
-formatter = logging.Formatter('[%(levelname)s]：%(message)s')
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
 __author__ = '__L1n__w@tch'
+
+logger = None
+old_root_path = None
 
 
 def get_balance(client):
@@ -53,6 +24,7 @@ def get_balance(client):
     :param client:
     :return:
     """
+    global logger
     logger.debug("获取当前资金情况")
     while True:
         try:
@@ -72,6 +44,7 @@ def get_position(client):
     :param client:
     :return:
     """
+    global logger
     logger.debug("获取当前持仓情况")
     while True:
         try:
@@ -91,13 +64,14 @@ def set_sell_cmd(client, code, price, *, amount=100, stock_info=None):
     设置卖出委托
     :return:
     """
+    global logger
     sell_top_price = round(stock_info["当前价"] * 1.1, 2)
     if sell_top_price < price:
         logger.error("股票：{}，期望卖出价格{}超出当天最高价{}，无法交易".format(code, price, sell_top_price))
     elif stock_info["可用数量"] == 0:
         logger.error("股票：{} 可用数量为 0，无法交易".format(code))
     else:
-        response = client.sell(code, price=price, amount=100)
+        response = client.sell(code, price=price, amount=amount)
         logger.warning("股票：{}，以期望卖出价格{}进行了委托".format(code, price))
         logger.critical("目前资产情况为：{}".format(get_balance(client)))
         logger.critical("目前持仓情况为：{}".format(get_position(client)))
@@ -113,13 +87,14 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
     :param amount:
     :return:
     """
+    global logger
     total_cost = price * amount
 
     if total_cost >= count_info["可用金额"]:
         logger.error("股票：{}，期望买入价格{}，总共需要{}超出目前可用余额{}，无法交易".format(code, price, total_cost, count_info["可用金额"]))
     else:
         try:
-            response = client.buy(code, price=price, amount=100)
+            response = client.buy(code, price=price, amount=amount)
             logger.critical("股票：{}，以期望买入价格{}进行了委托，总共消耗金额{}".format(code, price, total_cost))
             logger.critical("目前资产情况为：{}".format(get_balance(client)))
             logger.critical("目前持仓情况为：{}".format(get_position(client)))
@@ -129,6 +104,7 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
 
 
 def get_today_entrusts(client):
+    global logger
     logger.debug("获取当日委托情况")
     while True:
         try:
@@ -146,7 +122,8 @@ def get_today_entrusts(client):
 
 
 def get_today_decision(client):
-    final_answer_path = os.path.join(root_path, "final_answer.json")
+    global logger
+    final_answer_path = os.path.join(get_root_path(), "final_answer.json")
     if not os.path.exists(final_answer_path):
         import decision
         decision.get_decision()
@@ -154,9 +131,9 @@ def get_today_decision(client):
         final_answer = simplejson.load(f)
 
     balance = get_balance(client)
-    logger.warning("日期 {} 的资金情况为：{}".format(today, balance))
+    logger.warning("日期 {} 的资金情况为：{}".format(get_today(), balance))
     position = get_position(client)
-    logger.warning("日期 {} 的持仓情况为：{}".format(today, position))
+    logger.warning("日期 {} 的持仓情况为：{}".format(get_today(), position))
     return final_answer, position, balance
 
 
@@ -166,18 +143,20 @@ def set_sell_stop_cmd(client, position):
     :param client:
     :return:
     """
+    global logger
     # TODO：检查之前是否已设置过 1.03 止损的委托
     logger.info("观察持仓情况里，哪些需要卖出的")
     for each_keep in position:
         if each_keep["证券代码"] != "600271":
             logger.debug("跳过 航天信息 股")
+            continue
         sell_price = round(each_keep["参考成本价"] * 0.8, 2)
-        if each_keep["当前价"] < sell_price:
-            logger.warning("【止损】股票代码：{}，按照成本价：{} 乘以 0.8 后得到的价格委托卖出：{}".format(
-                each_keep["证券代码"], each_keep["参考成本价"], sell_price))
-            set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep)
-        else:
-            logger.info("股票代码：{}，止损价格为{}，目前价格{}还不需要止损".format(each_keep["证券代码"], sell_price, each_keep["当前价"]))
+        # if each_keep["当前价"] < sell_price:
+        logger.warning("【止损】股票代码：{}，按照成本价：{} 乘以 0.8 后得到的价格委托卖出：{}".format(
+            each_keep["证券代码"], each_keep["参考成本价"], sell_price))
+        set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep, amount=each_keep["可用数量"])
+        # else:
+        #     logger.info("股票代码：{}，止损价格为{}，目前价格{}还不需要止损".format(each_keep["证券代码"], sell_price, each_keep["当前价"]))
 
 
 def set_sell_earn_cmd(client, position, final_answer):
@@ -186,6 +165,7 @@ def set_sell_earn_cmd(client, position, final_answer):
     :param client:
     :return:
     """
+    global logger
     done_final_answer = False
     has_set_buy_cmd = False
 
@@ -195,7 +175,8 @@ def set_sell_earn_cmd(client, position, final_answer):
         sell_price = round(each_keep["参考成本价"] * 1.03, 2)
         logger.warning("股票代码：{}，按照成本价：{} 乘以 1.03 后得到的价格委托卖出：{}".format(
             each_keep["证券代码"], each_keep["参考成本价"], sell_price))
-        set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep)
+        amount = each_keep["可用数量"]
+        set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep, amount=amount)
 
     if not done_final_answer:
         logger.info("检查是否已提交委托")
@@ -211,7 +192,8 @@ def auto_market(client):
     自动交易
     :return:
     """
-    logger.info("获取日期 {} 的决策信息".format(today))
+    global logger
+    logger.info("获取日期 {} 的决策信息".format(get_today()))
 
     final_answer, position, balance = get_today_decision(client)
     logger.info("所有股票以成本价 * 1.03 卖出，并检查是否已买了决策里的股票")
@@ -221,7 +203,8 @@ def auto_market(client):
     set_sell_stop_cmd(client, position)
     if not done_final_answer and not has_set_buy_cmd:
         logger.info("按照决策，委托以 {} 的价格购买股票：{}".format(final_answer["buy"], final_answer["code"]))
-        set_buy_cmd(client, final_answer["code"], final_answer["buy"], count_info=balance)
+        amount = balance["可用金额"] // (final_answer["buy"] * 100)
+        set_buy_cmd(client, final_answer["code"], final_answer["buy"], count_info=balance, amount=amount * 100)
 
 
 def login_system():
@@ -229,6 +212,7 @@ def login_system():
     登录同花顺交易系统
     :return:
     """
+    global logger
     logger.debug("开始登录系统")
 
     user = easytrader.use('ths')
@@ -245,6 +229,54 @@ def login_system():
     return user
 
 
+def get_root_path():
+    today = get_today()
+    root_path = "log/{}".format(today)
+    os.makedirs(root_path, exist_ok=True)
+    return root_path
+
+
+def get_today():
+    today = datetime.datetime.today()
+    today = today.strftime("%Y-%m-%d")
+    return today
+
+
+def get_logger():
+    global logger, old_root_path
+    root_path = get_root_path()
+    if root_path != old_root_path:
+        logger = logging.getLogger('log')
+        old_root_path = root_path
+        logger.setLevel(logging.DEBUG)
+
+        # 文件日志
+        path = os.path.join(root_path, '{}.log'.format(os.path.basename(__file__)))
+        fh = logging.FileHandler(path, encoding='utf-8', mode='a')
+        fh.setLevel(logging.INFO)
+        formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(message)s',
+                                      datefmt='%Y-%m-%d_%I:%M:%S_%p')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+
+        # 重要文件日志
+        dl = logging.FileHandler(os.path.join(root_path, "deal.log"), encoding='utf-8', mode='a')
+        dl.setLevel(logging.CRITICAL)
+        formatter = logging.Formatter(fmt='[%(asctime)s-%(filename)s-%(levelname)s]:%(message)s',
+                                      datefmt='%Y-%m-%d_%I:%M:%S_%p')
+        dl.setFormatter(formatter)
+        logger.addHandler(dl)
+
+        # 控制台日志
+        formatter = logging.Formatter('[%(levelname)s]：%(message)s')
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
+    return logger
+
+
 def main_loop():
     """
     无限循环
@@ -252,11 +284,13 @@ def main_loop():
     2、没有买的，调用 decision.py，获取 final_answer.json，然后按其中的价格买入
     :return:
     """
+    logger = get_logger()
     logger.warning("{sep} 登录系统 {sep}".format(sep="=" * 30))
     client = login_system()
 
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
+        logger = get_logger()
         try:
             logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
             auto_market(client)
