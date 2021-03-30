@@ -40,6 +40,9 @@ def get_market_snapshot(logger):
         if "ST" in each_stock_info["name"].upper():
             logger.debug("跳过ST股票：{}".format(each_stock_info))
             continue
+        if "退市" in each_stock_info["name"]:
+            logger.debug("跳过退市股票：{}".format(each_stock_info))
+            continue
         if each_stock_info["now"] > 48:
             logger.debug("跳过价格超过 48 的股票：{}".format(each_stock_info))
             continue

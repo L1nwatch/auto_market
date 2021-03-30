@@ -169,7 +169,7 @@ def set_sell_earn_cmd(client, position, final_answer):
     has_set_buy_cmd = False
 
     for each_keep in position:
-        if each_keep["证券代码"] == final_answer["code"]:
+        if each_keep["证券代码"] == final_answer["code"].strip("szh"):
             done_final_answer = True
         sell_price = round(each_keep["参考成本价"] * 1.03, 2)
         logger.warning("股票代码：{}，按照成本价：{} 乘以 1.03 后得到的价格委托卖出：{}".format(
@@ -181,8 +181,11 @@ def set_sell_earn_cmd(client, position, final_answer):
         logger.info("检查是否已提交委托")
         today_entrusts = get_today_entrusts(client)
         if len(today_entrusts) > 0:
-            logger.info("已设置委托")
-            has_set_buy_cmd = True
+            for each_entrust in today_entrusts:
+                if each_entrust["证券代码"] == final_answer["code"].strip("szh"):
+                    logger.info("已设置委托")
+                    has_set_buy_cmd = True
+                    break
     return done_final_answer, has_set_buy_cmd
 
 
@@ -235,6 +238,7 @@ def main_loop():
     2、没有买的，调用 decision.py，获取 final_answer.json，然后按其中的价格买入
     :return:
     """
+    #TODO： 日志重复记录了
     global logger, old_root_path
     logger, old_root_path = get_logger(logger, old_root_path)
     logger.warning("{sep} 登录系统 {sep}".format(sep="=" * 30))
