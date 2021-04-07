@@ -27,6 +27,9 @@ def get_logger(logger, old_root_path):
     root_path = get_root_path()
     if root_path != old_root_path:
         logger = logging.getLogger('log')
+        for each_handler in logger.handlers:
+            logger.removeHandler(each_handler)
+
         old_root_path = root_path
         logger.setLevel(logging.DEBUG)
 
