@@ -3,6 +3,7 @@
 # version: Python3.X
 """ 主进程，执行循环监控
 """
+import datetime
 import os
 import time
 import easytrader
@@ -248,6 +249,11 @@ def main_loop():
 
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
+        # now_time = get_today()
+        # if is_not_right_time(now_time):
+        #     logger.info("{sep} 还未到指定时间 {sep}".format(sep="=" * 30))
+        #     time.sleep(60 * 5)
+        #     continue
         logger, old_root_path = get_logger(logger, old_root_path)
         try:
             logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
