@@ -233,6 +233,18 @@ def login_system():
 
     return user
 
+def is_not_right_time(now):
+    """
+    一天就运行一个时间段：周一~周五，早上 8:30-9:00
+    """
+    # 周一到周五
+    if now.day not in (1,2,3,4,5):
+        return False
+    # 小时 && 分钟
+    if now.hour == 8 and 30 <= now.minute <= 59:
+        return True
+    return False
+    
 
 def main_loop():
     """
@@ -249,11 +261,11 @@ def main_loop():
 
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
-        # now_time = get_today()
-        # if is_not_right_time(now_time):
-        #     logger.info("{sep} 还未到指定时间 {sep}".format(sep="=" * 30))
-        #     time.sleep(60 * 5)
-        #     continue
+        now_time = get_today()
+        if is_not_right_time(now_time):
+            logger.info("{sep} 还未到指定时间 {sep}".format(sep="=" * 30))
+            time.sleep(60 * 5)
+            continue
         logger, old_root_path = get_logger(logger, old_root_path)
         try:
             logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
