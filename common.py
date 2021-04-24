@@ -57,3 +57,20 @@ def get_logger(logger, old_root_path):
         logger.addHandler(ch)
 
     return logger, old_root_path
+
+
+def analysis_trades_log():
+    """
+    分析交易记录，生成 readme.md 中的战绩表格
+    :return:
+    """
+    history = dict()
+    return history
+
+
+def update_readme_history():
+    """
+    更新 readme.md 中的战绩内容
+    :return:
+    """
+    pass

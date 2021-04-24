@@ -16,6 +16,7 @@ __author__ = '__L1n__w@tch'
 
 logger = None
 old_root_path = None
+trades_log_path = "log/trades_log.json"
 
 
 def get_balance(client):
@@ -119,6 +120,19 @@ def get_today_entrusts(client):
             return result
         except Exception as e:
             logger.error("API 调用失败，无法获取当前委托情况：{}".format(e))
+            login_system()
+            time.sleep(10)
+
+
+def get_today_trades(client):
+    global logger
+    logger.debug("获取当天交易情况")
+    while True:
+        try:
+            result = client.today_trades
+            return result
+        except Exception as e:
+            logger.error("API 调用失败，无法获取当天交易情况：{}".format(e))
             login_system()
             time.sleep(10)
 
@@ -235,11 +249,12 @@ def login_system():
 
     return user
 
-def is_right_time():
+
+def is_right_commission_time():
     """
-    一天就运行一个时间段：周一~周五，早上 8:30-9:00
+    判断是否为合适的委托时间，一天就运行一个时间段：周一~周五，早上 8:30-9:00
     """
-    now=datetime.datetime.today()
+    now = datetime.datetime.today()
     # 周一到周五
     if not now.isoweekday():
         return False
@@ -247,7 +262,42 @@ def is_right_time():
     if now.hour == 8 and 30 <= now.minute <= 59:
         return True
     return False
-    
+
+
+def is_right_update_history_time():
+    """
+    判断是否为合适的分析时间，一天就运行一个时间段：周一~周五，晚上 8:30-9:00
+    :return:
+    """
+    now = datetime.datetime.today()
+    # 周一到周五
+    if not now.isoweekday():
+        return False
+    # 小时 && 分钟
+    if now.hour == 20 and 30 <= now.minute <= 59:
+        return True
+    return False
+
+
+def update_history_content(client):
+    """
+    获取当天的交易情况，并更新 readme
+    :return:
+    """
+    global trades_log_path
+    # 保存当天的交易情况
+    today_trades_info = get_today_trades(client)
+    logger.info("获取当天的交易情况：{}".format(today_trades_info))
+
+    with open(trades_log_path, "r", encoding="utf8") as f:
+        total_trades_info = simplejson.load(f, encoding="utf8")
+    total_trades_info["update_time"] = str(datetime.datetime.today())
+    if len(today_trades_info) > 0:
+        total_trades_info["trades"].append(today_trades_info)
+    with open(trades_log_path, "w", encoding="utf8") as f:
+        simplejson.dump(total_trades_info, f, ensure_ascii=False)
+    logger.info("已将当天的交易情况，更新到 trades_log.json 文件当中".format(today_trades_info))
+
 
 def main_loop():
     """
@@ -263,18 +313,28 @@ def main_loop():
 
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
-        if not is_right_time():
+        if is_right_commission_time():
+            logger, old_root_path = get_logger(logger, old_root_path)
+            try:
+                logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
+                auto_market(client)
+            except Exception as e:
+                logger.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
+            finally:
+                time.sleep(10)
+        elif is_right_update_history_time():
+            logger, old_root_path = get_logger(logger, old_root_path)
+            try:
+                logger.info("已到了指定的分析时间，开始分析当天的交易情况")
+                update_history_content(client)
+            except Exception as e:
+                logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
+            finally:
+                time.sleep(60 * 5)
+        else:
             logger.info("{sep} 还未到指定时间 {sep}".format(sep="=" * 30))
             time.sleep(60 * 5)
             continue
-        logger, old_root_path = get_logger(logger, old_root_path)
-        try:
-            logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
-            auto_market(client)
-        except Exception as e:
-            logger.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
-        finally:
-            time.sleep(10)
 
 
 if __name__ == "__main__":
