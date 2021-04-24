@@ -3,16 +3,15 @@
 # version: Python3.X
 """ 主进程，执行循环监控
 """
+import datetime
 import logging
 import os
-
 import sys
-import datetime
 
 
 def get_root_path():
     today = get_today()
-    root_path = "log/{}".format(today)
+    root_path = "../temp_auto_market_log/{}".format(today)
     os.makedirs(root_path, exist_ok=True)
     return root_path
 

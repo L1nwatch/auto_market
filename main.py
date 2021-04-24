@@ -6,8 +6,10 @@
 import datetime
 import os
 import time
+
 import easytrader
 import simplejson
+
 from common import get_today, get_root_path, get_logger
 
 __author__ = '__L1n__w@tch'
@@ -86,8 +88,8 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
     :return:
     """
     global logger
-    # TODO: 这里写死了只买一手
-    amount = 100
+    # TODO: 这里写死了只买 n 手，因为策略还不确定有效性，一手一手地加
+    amount = 200
     total_cost = price * amount
 
     if total_cost >= count_info["可用金额"]:
@@ -254,7 +256,6 @@ def main_loop():
     2、没有买的，调用 decision.py，获取 final_answer.json，然后按其中的价格买入
     :return:
     """
-    # TODO： 日志重复记录了
     global logger, old_root_path
     logger, old_root_path = get_logger(logger, old_root_path)
     logger.warning("{sep} 登录系统 {sep}".format(sep="=" * 30))
