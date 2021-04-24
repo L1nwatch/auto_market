@@ -3,14 +3,15 @@
 # version: Python3.X
 """ 做出股票相关的决策
 """
-import easyquotation
-import baostock as bs
-import pandas as pd
-import simplejson
 import datetime
-import tushare
 import os
-from common import get_logger, get_root_path, get_today
+
+import baostock as bs
+import easyquotation
+import simplejson
+import tushare
+
+from common import get_logger, get_root_log_path, get_today
 
 __author__ = '__L1n__w@tch'
 
@@ -102,9 +103,9 @@ def get_stock_number_with_condition(logger):
         report_list.append(report)
         result_list.append(each_stock)
     logger.info("总共 {} 只股票，筛选出 {} 只股票".format(i, len(result_list)))
-    with open(os.path.join(get_root_path(), "report.json"), "w", encoding="utf8") as f:
+    with open(os.path.join(get_root_log_path(), "report.json"), "w", encoding="utf8") as f:
         simplejson.dump(report_list, f, ensure_ascii=False)
-    with open(os.path.join(get_root_path(), "result.json"), "w", encoding="utf8") as f:
+    with open(os.path.join(get_root_log_path(), "result.json"), "w", encoding="utf8") as f:
         simplejson.dump(result_list, f, ensure_ascii=False)
     return result_list
 
@@ -133,7 +134,7 @@ def get_price_info_with_stock_number(stock_list, logger):
         logger.info("股票代码: {}, 离最低点差值: {:.2%}, 离最高点差值: {:.2%}, 当前价格: {}, 最低价格: {}, 最高价格: {}"
                     .format(each_stock, sep_low, sep_high, cur_price, low_price, high_price))
     result = sorted(result, key=lambda x: float(x["sep_low"]))
-    with open(os.path.join(get_root_path(), "low_result.json"), "w", encoding="utf8") as f:
+    with open(os.path.join(get_root_log_path(), "low_result.json"), "w", encoding="utf8") as f:
         simplejson.dump(result, f)
     return result
 
@@ -172,21 +173,21 @@ def get_decision():
 
     logger.info("{sep} 获取所有近期有公告的股票代码 {sep}".format(sep="=" * 30))
     all_code = get_stock_number_with_condition(logger)
-    with open(os.path.join(get_root_path(), "result.json"), "r", encoding="utf8") as f:
+    with open(os.path.join(get_root_log_path(), "result.json"), "r", encoding="utf8") as f:
         all_code = simplejson.load(f)
 
     logger.info("{sep} 获取股票代码对应的，近期的最高最低价格 {sep}".format(sep="=" * 30))
     all_price = get_price_info_with_stock_number(all_code, logger)
 
     logger.info("{sep} 得出最终的决策 {sep}".format(sep="=" * 30))
-    with open(os.path.join(get_root_path(), "low_result.json"), "r", encoding="utf8") as f:
+    with open(os.path.join(get_root_log_path(), "low_result.json"), "r", encoding="utf8") as f:
         all_price = simplejson.load(f)
     final_answer = get_final_answer(all_price)
     message = "推荐股票/买价/卖价：{}/{}/{}".format(final_answer["code"], final_answer["buy"], final_answer["sell"])
     logger.critical("{sep} 今天的日期为：{today_date} {sep}".format(sep="=" * 30, today_date=get_today()))
     logger.critical("{sep} {message} {sep}".format(sep="=" * 30, message=message))
     logger.critical("全部信息：{message}".format(sep="=" * 30, message=final_answer))
-    with open(os.path.join(get_root_path(), "final_answer.json"), mode="w", encoding="utf8") as f:
+    with open(os.path.join(get_root_log_path(), "final_answer.json"), mode="w", encoding="utf8") as f:
         simplejson.dump(final_answer, f)
 
     # 收尾工作

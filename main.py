@@ -10,7 +10,7 @@ import time
 import easytrader
 import simplejson
 
-from common import get_today, get_root_path, get_logger
+from common import get_today, get_root_log_path, get_logger
 
 __author__ = '__L1n__w@tch'
 
@@ -139,7 +139,7 @@ def get_today_trades(client):
 
 def get_today_decision(client):
     global logger
-    final_answer_path = os.path.join(get_root_path(), "final_answer.json")
+    final_answer_path = os.path.join(get_root_log_path(), "final_answer.json")
     if not os.path.exists(final_answer_path):
         import decision
         decision.get_decision()
@@ -279,6 +279,18 @@ def is_right_update_history_time():
     return False
 
 
+def push_to_github():
+    """
+    将更新内容上传到 github 上
+    :return:
+    """
+    git_path = os.path.abspath(os.path.dirname(__file__))
+    os.system("cd {} && git add log/trades_log.json".format(git_path))
+    os.system("cd {} && git add README.md".format(git_path))
+    os.system('cd {} && git commit -m "{} update trades_log.json and readme.md "'.format(git_path, get_today()))
+    os.system('cd {} && git push'.format(git_path))
+
+
 def update_history_content(client):
     """
     获取当天的交易情况，并更新 readme
@@ -327,6 +339,7 @@ def main_loop():
             try:
                 logger.info("已到了指定的分析时间，开始分析当天的交易情况")
                 update_history_content(client)
+                push_to_github()
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:

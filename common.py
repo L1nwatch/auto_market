@@ -9,7 +9,7 @@ import os
 import sys
 
 
-def get_root_path():
+def get_root_log_path():
     today = get_today()
     root_path = "../temp_auto_market_log/{}".format(today)
     os.makedirs(root_path, exist_ok=True)
@@ -23,7 +23,7 @@ def get_today():
 
 
 def get_logger(logger, old_root_path):
-    root_path = get_root_path()
+    root_path = get_root_log_path()
     if root_path != old_root_path:
         logger = logging.getLogger('log')
         for each_handler in logger.handlers:
