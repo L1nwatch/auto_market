@@ -1,12 +1,46 @@
 #!/venv/env python3
 # -*- coding: utf-8 -*-
 # version: Python3.X
-""" 主进程，执行循环监控
+""" 各种辅助函数
 """
 import datetime
 import logging
 import os
+import re
+import smtplib
 import sys
+from email.header import Header
+from email.mime.text import MIMEText
+
+import simplejson
+
+
+def send_result_using_email():
+    """
+    把结果通过邮件发出来
+    :param pic_path:
+    :return:
+    """
+    today = get_today()
+    sender = 'watch@watch0.top'
+    receivers = ['490772448@qq.com', "watch@watch0.top"]
+
+    with open("README.md", "r", encoding="utf8") as f:
+        message_content = re.findall("【history_start】([\s\S]*)【history_end】", f.read())[0]
+
+    message = MIMEText(message_content, 'plain', 'utf-8')
+    message['From'] = Header(sender, 'utf-8')
+    message['To'] = Header(",".join(receivers), 'utf-8')
+    subject = '【auto_market】{} 交易结果'.format(today)
+    message['Subject'] = Header(subject, 'utf-8')
+
+    with open("information.json", "r") as f:
+        data = simplejson.load(f)
+
+    with smtplib.SMTP_SSL("hwsmtp.exmail.qq.com", 465) as server:
+        server.set_debuglevel(1)
+        server.login(data["account"], data["password"])
+        server.sendmail(sender, receivers, message.as_string())
 
 
 def get_root_log_path():

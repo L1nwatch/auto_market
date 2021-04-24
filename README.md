@@ -33,5 +33,4 @@
 
 # ToDo
 * 实现自动更新 readme
-* 实现自动更新到 GitHub
 * 实现每天发邮件，显示 readme 战绩内容

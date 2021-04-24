@@ -10,7 +10,7 @@ import time
 import easytrader
 import simplejson
 
-from common import get_today, get_root_log_path, get_logger
+from common import get_today, get_root_log_path, get_logger, send_result_using_email
 
 __author__ = '__L1n__w@tch'
 
@@ -335,11 +335,15 @@ def main_loop():
             finally:
                 time.sleep(10)
         elif is_right_update_history_time():
+            logger.info("已到了指定的分析时间，开始分析当天的交易情况")
             logger, old_root_path = get_logger(logger, old_root_path)
             try:
-                logger.info("已到了指定的分析时间，开始分析当天的交易情况")
                 update_history_content(client)
+                logger.info("分析完毕，已更新 README.md 以及 trades_log.json")
                 push_to_github()
+                logger.info("已将结果上传到 GitHub 上")
+                send_result_using_email()
+                logger.info("已将结果用邮件发送周知")
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:
