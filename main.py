@@ -326,6 +326,8 @@ def main_loop():
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
         if is_right_commission_time():
+            if os.path.exists("send_mail.lock"):
+                os.remove("send_mail.lock")
             logger, old_root_path = get_logger(logger, old_root_path)
             try:
                 logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
@@ -334,7 +336,7 @@ def main_loop():
                 logger.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:
                 time.sleep(10)
-        elif is_right_update_history_time():
+        elif is_right_update_history_time() and not os.path.exists("send_mail.lock"):
             logger.info("已到了指定的分析时间，开始分析当天的交易情况")
             logger, old_root_path = get_logger(logger, old_root_path)
             try:
@@ -344,6 +346,8 @@ def main_loop():
                 logger.info("已将结果上传到 GitHub 上")
                 send_result_using_email()
                 logger.info("已将结果用邮件发送周知")
+                with open("send_mail.lock","w") as f:
+                    pass
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:
