@@ -129,6 +129,7 @@ def get_today_trades(client):
     logger.debug("获取当天交易情况")
     while True:
         try:
+            login_system()
             result = client.today_trades
             return result
         except Exception as e:
