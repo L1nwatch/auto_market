@@ -98,7 +98,42 @@ def analysis_trades_log():
     分析交易记录，生成 readme.md 中的战绩表格
     :return:
     """
-    history = dict()
+    history = list()
+    with open("log/trades_log.json", "r", encoding="utf8") as f:
+        data = simplejson.load(f)
+    trade_index = dict()
+    for each_day_trades in data["trades"]:
+        trade_date = each_day_trades.pop(0)
+        trade_date_code = list()
+        for each_trade in each_day_trades:
+            code = each_trade["证券代码"]
+            if code in trade_date_code:
+                continue
+            else:
+                trade_date_code.append(code)
+
+            if code not in trade_index.keys():
+                trade_index[each_trade["证券代码"]] = len(history)
+                history.append({"股票代码": each_trade["证券代码"], "股票名称": each_trade["证券名称"], "序号": len(history) + 1})
+                if each_trade["操作"] == "证券买入":
+                    history[trade_index[each_trade["证券代码"]]].update(
+                        {"买入日期": [trade_date], "买入价格": [each_trade["成交均价"]]})
+                elif each_trade["操作"] == "证券卖出":
+                    history[trade_index[each_trade["证券代码"]]].update({"卖出日期": trade_date, "卖出价格": each_trade["成交均价"]})
+            elif each_trade["操作"] == "证券买入":
+                index = trade_index[each_trade["证券代码"]]
+                history[index]["买入日期"].append(trade_date)
+                history[index]["买入价格"].append(each_trade["成交均价"])
+            elif each_trade["操作"] == "证券卖出":
+                index = trade_index[each_trade["证券代码"]]
+                keep_date_end = datetime.datetime.strptime(trade_date, "%Y-%m-%d")
+                keep_date_start = datetime.datetime.strptime(history[index]["买入日期"][0], "%Y-%m-%d")
+                keep_date = (keep_date_end - keep_date_start).days
+                update_dict = {"卖出日期": trade_date, "卖出价格": each_trade["成交均价"],
+                               "持有天数": keep_date}
+                history[index].update(update_dict)
+                del trade_index[each_trade["证券代码"]]
+
     return history
 
 
@@ -107,4 +142,4 @@ def update_readme_history():
     更新 readme.md 中的战绩内容
     :return:
     """
-    pass
+    analysis_result = analysis_trades_log()

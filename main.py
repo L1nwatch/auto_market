@@ -10,7 +10,7 @@ import time
 import easytrader
 import simplejson
 
-from common import get_today, get_root_log_path, get_logger, send_result_using_email
+from common import get_today, get_root_log_path, get_logger, send_result_using_email, update_readme_history
 
 __author__ = '__L1n__w@tch'
 
@@ -286,17 +286,13 @@ def push_to_github():
     :return:
     """
     git_path = os.path.abspath(os.path.dirname(__file__))
-    os.system("cd {} && git add log/trades_log.json".format(git_path))
+    # os.system("cd {} && git add log/trades_log.json".format(git_path))
     os.system("cd {} && git add README.md".format(git_path))
     os.system('cd {} && git commit -m "{} update trades_log.json and readme.md "'.format(git_path, get_today()))
     os.system('cd {} && git push'.format(git_path))
 
 
-def update_history_content(client):
-    """
-    获取当天的交易情况，并更新 readme
-    :return:
-    """
+def update_trades_log(client):
     global trades_log_path
     # 保存当天的交易情况
     today_trades_info = get_today_trades(client)
@@ -306,10 +302,20 @@ def update_history_content(client):
         total_trades_info = simplejson.load(f, encoding="utf8")
     total_trades_info["update_time"] = str(datetime.datetime.today())
     if len(today_trades_info) > 0:
+        today_trades_info.insert(0, get_today())
         total_trades_info["trades"].append(today_trades_info)
     with open(trades_log_path, "w", encoding="utf8") as f:
         simplejson.dump(total_trades_info, f, ensure_ascii=False)
     logger.info("已将当天的交易情况，更新到 trades_log.json 文件当中".format(today_trades_info))
+
+
+def update_history_content(client):
+    """
+    获取当天的交易情况，并更新 readme
+    :return:
+    """
+    update_trades_log(client)
+    update_readme_history()
 
 
 def main_loop():
@@ -347,7 +353,7 @@ def main_loop():
                 logger.info("已将结果上传到 GitHub 上")
                 send_result_using_email()
                 logger.info("已将结果用邮件发送周知")
-                with open("send_mail.lock","w") as f:
+                with open("send_mail.lock", "w") as f:
                     pass
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
