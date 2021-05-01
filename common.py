@@ -119,7 +119,8 @@ def analysis_trades_log():
                     history[trade_index[each_trade["证券代码"]]].update(
                         {"买入日期": [trade_date], "买入价格": [each_trade["成交均价"]]})
                 elif each_trade["操作"] == "证券卖出":
-                    history[trade_index[each_trade["证券代码"]]].update({"卖出日期": trade_date, "卖出价格": each_trade["成交均价"]})
+                    history[trade_index[each_trade["证券代码"]]].update(
+                        {"卖出日期": trade_date, "卖出价格": each_trade["成交均价"]})
             elif each_trade["操作"] == "证券买入":
                 index = trade_index[each_trade["证券代码"]]
                 history[index]["买入日期"].append(trade_date)
@@ -128,13 +129,35 @@ def analysis_trades_log():
                 index = trade_index[each_trade["证券代码"]]
                 keep_date_end = datetime.datetime.strptime(trade_date, "%Y-%m-%d")
                 keep_date_start = datetime.datetime.strptime(history[index]["买入日期"][0], "%Y-%m-%d")
-                keep_date = (keep_date_end - keep_date_start).days
+                keep_date = str((keep_date_end - keep_date_start).days)
                 update_dict = {"卖出日期": trade_date, "卖出价格": each_trade["成交均价"],
                                "持有天数": keep_date}
                 history[index].update(update_dict)
                 del trade_index[each_trade["证券代码"]]
 
-    return history
+    return [data["update_time"], history]
+
+
+def generate_md_content(history_content):
+    result = """【history_start】
+
+最近一次更新日期为：{}
+
+| 序号 | 股票代码 | 股票名称 | 买入日期 | 买入价格 | 卖出日期 | 卖出价格 | 持有天数 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+{}
+
+【history_end】"""
+    update_date = history_content[0]
+    history_table = str()
+    for each_trade in history_content[1]:
+        trade_data = list()
+        for each_field in ["序号", "股票代码", "股票名称", "买入日期", "买入价格", "卖出日期", "卖出价格", "持有天数"]:
+            trade_data.append(str(each_trade.get(each_field, "?")))
+
+        content = "|".join(trade_data)
+        history_table += "|" + content + "|\n"
+    return result.format(update_date, history_table)
 
 
 def update_readme_history():
@@ -143,3 +166,9 @@ def update_readme_history():
     :return:
     """
     analysis_result = analysis_trades_log()
+    with open("README.md", "r", encoding="utf8") as f:
+        data = f.read()
+    update_data = generate_md_content(analysis_result)
+    result = re.sub("【history_start】([\s\S]+)【history_end】", update_data, data)
+    with open("README.md", "w", encoding="utf8") as f:
+        f.write(result)
