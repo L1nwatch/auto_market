@@ -7,6 +7,7 @@ import unittest
 from unittest import TestCase
 from unittest.mock import MagicMock
 
+import common
 import main
 
 __author__ = '__L1n__w@tch'
@@ -21,3 +22,7 @@ class TestMain_loop(TestCase):
         with unittest.mock.patch("main.is_right_update_history_time") as my_mock:
             my_mock.return_value = True
             main.main_loop()
+
+class TestCommon(TestCase):
+    def test_update_readme_history(self):
+        common.update_readme_history()
