@@ -272,7 +272,7 @@ def is_right_update_history_time():
     """
     now = datetime.datetime.today()
     # 周一到周五
-    if not now.isoweekday():
+    if not (1 <= now.isoweekday() <= 5):
         return False
     # 小时 && 分钟
     if now.hour == 20 and 30 <= now.minute <= 59:
