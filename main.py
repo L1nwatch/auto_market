@@ -130,6 +130,7 @@ def get_today_trades(client):
     while True:
         try:
             login_system()
+            client.refresh()
             result = client.today_trades
             return result
         except Exception as e:
