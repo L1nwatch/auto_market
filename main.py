@@ -165,7 +165,10 @@ def set_sell_stop_cmd(client, position):
     # TODO：检查之前是否已设置过 1.03 止损的委托
     logger.info("观察持仓情况里，哪些需要卖出的")
     for each_keep in position:
-        if each_keep["证券代码"] != "600271":
+        if each_keep["可用数量"] == 0:
+            logger.debug("股:{}，可用数量为0".format(each_keep["证券代码"]))
+            continue
+        if each_keep["证券代码"] == "600271":
             logger.debug("跳过 航天信息 股")
             continue
         sell_price = round(each_keep["参考成本价"] * 0.8, 2)
