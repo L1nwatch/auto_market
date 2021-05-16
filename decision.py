@@ -160,13 +160,13 @@ def get_final_answer(newest_price_info):
     return answer
 
 
-def get_decision():
+def get_decision(logger=None,old_root_path=None):
     """
     获取要购买哪些股票，买多少等相关决策信息
     :return:
     """
-    logger, old_root_path = None, None
-    logger, old_root_path = get_logger(logger, old_root_path)
+    if not logger or not old_root_path:
+        logger, old_root_path = get_logger(logger, old_root_path)
 
     # 准备工作
     lq = prepare()

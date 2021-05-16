@@ -66,17 +66,20 @@ def set_sell_cmd(client, code, price, *, amount=100, stock_info=None):
     :return:
     """
     global logger
-    sell_top_price = round(stock_info["当前价"] * 1.1, 2)
-    if sell_top_price < price:
-        logger.error("股票：{}，期望卖出价格{}超出当天最高价{}，无法交易".format(code, price, sell_top_price))
-    elif stock_info["可用数量"] == 0:
-        logger.error("股票：{} 可用数量为 0，无法交易".format(code))
-    else:
-        response = client.sell(code, price=price, amount=amount)
-        logger.warning("股票：{}，以期望卖出价格{}进行了委托".format(code, price))
-        logger.critical("目前资产情况为：{}".format(get_balance(client)))
-        logger.critical("目前持仓情况为：{}".format(get_position(client)))
-        return response
+    try:
+        sell_top_price = round(stock_info["当前价"] * 1.1, 2)
+        if sell_top_price < price:
+            logger.error("股票：{}，期望卖出价格{}超出当天最高价{}，无法交易".format(code, price, sell_top_price))
+        elif stock_info["可用数量"] == 0:
+            logger.error("股票：{} 可用数量为 0，无法交易".format(code))
+        else:
+            response = client.sell(code, price=price, amount=amount)
+            logger.warning("股票：{}，以期望卖出价格{}进行了委托".format(code, price))
+            logger.critical("目前资产情况为：{}".format(get_balance(client)))
+            logger.critical("目前持仓情况为：{}".format(get_position(client)))
+            return response
+    except Exception as e:
+        logger.error("设置卖出委托失败：{}".format(e))
 
 
 def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=None):
@@ -140,11 +143,11 @@ def get_today_trades(client):
 
 
 def get_today_decision(client):
-    global logger
+    global logger, old_root_path
     final_answer_path = os.path.join(get_root_log_path(), "final_answer.json")
     if not os.path.exists(final_answer_path):
         import decision
-        decision.get_decision()
+        decision.get_decision(logger, old_root_path)
     with open(final_answer_path, "r") as f:
         final_answer = simplejson.load(f)
 
@@ -193,6 +196,7 @@ def set_sell_earn_cmd(client, position, final_answer):
     for each_keep in position:
         if each_keep["证券代码"] == final_answer["code"].strip("szh"):
             if str(each_keep["参考成本价"]) == str(final_answer["buy"]):
+                logger.info("已完成决策股票的购买")
                 done_final_answer = True
         sell_price = round(each_keep["参考成本价"] * 1.03, 2)
         logger.warning("股票代码：{}，按照成本价：{} 乘以 1.03 后得到的价格委托卖出：{}".format(
@@ -224,6 +228,7 @@ def auto_market(client):
     final_answer, position, balance = get_today_decision(client)
     logger.info("所有股票以成本价 * 1.03 卖出，并检查是否已买了决策里的股票")
     done_final_answer, has_set_buy_cmd = set_sell_earn_cmd(client, position, final_answer)
+    logger.info("决策股票的购买情况：{} 和委托情况：{}".format(done_final_answer, has_set_buy_cmd))
 
     logger.info("卖出所有需要止损的股票")
     set_sell_stop_cmd(client, position)
@@ -271,13 +276,14 @@ def is_right_commission_time():
 
 def is_right_update_history_time():
     """
-    判断是否为合适的分析时间，一天就运行一个时间段：周一~周五，晚上 8:30-9:00
+    Old-before-2021-05-16: 判断是否为合适的分析时间，一天就运行一个时间段：周一~周五，晚上 8:30-9:00
+    判断是否为合适的分析时间，一天就运行一个时间段：每天晚上 8:30-9:00
     :return:
     """
     now = datetime.datetime.today()
     # 周一到周五
-    if not (1 <= now.isoweekday() <= 5):
-        return False
+    # if not (1 <= now.isoweekday() <= 5):
+    #     return False
     # 小时 && 分钟
     if now.hour == 20 and 30 <= now.minute <= 59:
         return True
