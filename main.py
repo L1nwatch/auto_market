@@ -298,7 +298,7 @@ def push_to_github():
     git_path = os.path.abspath(os.path.dirname(__file__))
     # os.system("cd {} && git add log/trades_log.json".format(git_path))
     os.system("cd {} && git add README.md".format(git_path))
-    os.system('cd {} && git commit -m "{} update trades_log.json and readme.md "'.format(git_path, get_today()))
+    os.system('cd {} && git commit -m "{} update readme.md "'.format(git_path, get_today()))
     os.system('cd {} && git push'.format(git_path))
 
 
@@ -364,6 +364,7 @@ def main_loop():
                 send_result_using_email()
                 logger.info("已将结果用邮件发送周知")
                 with open("send_mail.lock", "w") as f:
+                    logger.info("当天的分析已完成，创建 lock 锁")
                     pass
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))

@@ -23,6 +23,8 @@ class TestMain_loop(TestCase):
             my_mock.return_value = True
             main.main_loop()
 
+
 class TestCommon(TestCase):
     def test_update_readme_history(self):
         common.update_readme_history()
+
