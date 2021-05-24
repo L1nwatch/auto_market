@@ -253,6 +253,9 @@ def login_system():
     try:
         logger.info("尝试一键打新")
         user.auto_ipo()
+        user.connect(r'C:\Software\同花顺\xiadan.exe')
+        user.refresh()
+        user.enable_type_keys_for_editor()
         logger.warning("一键打新成功")
     except Exception as e:
         logger.info("一键打新失败：{}".format(e))
@@ -359,15 +362,14 @@ def main_loop():
             try:
                 update_history_content(client)
                 logger.info("分析完毕，已更新 README.md 以及 trades_log.json")
-                push_to_github()
-                logger.info("已将结果上传到 GitHub 上")
-
                 if not os.path.exists("send_mail.lock"):
+                    push_to_github()
+                    logger.info("已将结果上传到 GitHub 上")
                     send_result_using_email()
-                logger.info("已将结果用邮件发送周知")
-                with open("send_mail.lock", "w") as f:
-                    logger.info("当天的分析已完成，创建 lock 锁")
-                    pass
+                    logger.info("已将结果用邮件发送周知")
+                    with open("send_mail.lock", "w") as f:
+                        logger.info("当天的分析已完成，创建 lock 锁")
+                        pass
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:
