@@ -356,20 +356,19 @@ def main_loop():
                 logger.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:
                 time.sleep(10)
-        elif is_right_update_history_time():
+        elif is_right_update_history_time() and not os.path.exists("send_mail.lock"):
             logger.info("已到了指定的分析时间，开始分析当天的交易情况")
             logger, old_root_path = get_logger(logger, old_root_path)
             try:
                 update_history_content(client)
                 logger.info("分析完毕，已更新 README.md 以及 trades_log.json")
-                if not os.path.exists("send_mail.lock"):
-                    push_to_github()
-                    logger.info("已将结果上传到 GitHub 上")
-                    send_result_using_email()
-                    logger.info("已将结果用邮件发送周知")
-                    with open("send_mail.lock", "w") as f:
-                        logger.info("当天的分析已完成，创建 lock 锁")
-                        pass
+                push_to_github()
+                logger.info("已将结果上传到 GitHub 上")
+                send_result_using_email()
+                logger.info("已将结果用邮件发送周知")
+                with open("send_mail.lock", "w") as f:
+                    logger.info("当天的分析已完成，创建 lock 锁")
+                    pass
             except Exception as e:
                 logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
             finally:
