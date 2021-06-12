@@ -23,6 +23,15 @@ class TestMain_loop(TestCase):
             my_mock.return_value = True
             main.main_loop()
 
+    def test_when_right_commission_come(self):
+        """
+        假设 morning 的时间已到，用于调试脚本用的
+        :return:
+        """
+        with unittest.mock.patch("main.is_right_commission_time") as my_mock:
+            my_mock.return_value = True
+            main.main_loop()
+
 
 class TestCommon(TestCase):
     def test_update_readme_history(self):

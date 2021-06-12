@@ -356,14 +356,18 @@ def right_update_history_time_deal(logger, old_root_path, client):
             with open(update_readme_lock_path, "w") as f:
                 logger.info("当天的 readme 已更新，创建 lock 锁")
                 pass
+        else:
+            logger.info("当天存在 readme 锁，不处理")
         if not os.path.exists(send_mail_lock_path):
             push_to_github()
             logger.info("已将结果上传到 GitHub 上")
             send_result_using_email()
             logger.info("已将结果用邮件发送周知")
             with open(send_mail_lock_path, "w") as f:
-                logger.info("当天的分析已完成，创建 lock 锁")
+                logger.info("当天的分析邮件已发送，创建 lock 锁")
                 pass
+        else:
+            logger.info("当天存在 send mail 锁，不处理")
     except Exception as e:
         logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
     finally:
