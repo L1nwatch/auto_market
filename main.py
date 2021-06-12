@@ -331,6 +331,45 @@ def update_history_content(client):
     update_readme_history()
 
 
+def right_commission_time_deal(logger, old_root_path, client):
+    if os.path.exists("send_mail.lock"):
+        os.remove("send_mail.lock")
+    logger, old_root_path = get_logger(logger, old_root_path)
+    try:
+        logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
+        auto_market(client)
+    except Exception as e:
+        logger.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
+    finally:
+        time.sleep(10)
+
+
+def right_update_history_time_deal(logger, old_root_path, client):
+    logger.info("已到了指定的分析时间，开始分析当天的交易情况")
+    logger, old_root_path = get_logger(logger, old_root_path)
+    update_readme_lock_path = os.path.join(old_root_path, "update_readme.lock")
+    send_mail_lock_path = os.path.join(old_root_path, "send_mail.lock")
+    try:
+        if not os.path.exists(update_readme_lock_path):
+            update_history_content(client)
+            logger.info("分析完毕，已更新 README.md 以及 trades_log.json")
+            with open(update_readme_lock_path, "w") as f:
+                logger.info("当天的 readme 已更新，创建 lock 锁")
+                pass
+        if not os.path.exists(send_mail_lock_path):
+            push_to_github()
+            logger.info("已将结果上传到 GitHub 上")
+            send_result_using_email()
+            logger.info("已将结果用邮件发送周知")
+            with open(send_mail_lock_path, "w") as f:
+                logger.info("当天的分析已完成，创建 lock 锁")
+                pass
+    except Exception as e:
+        logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
+    finally:
+        time.sleep(60 * 5)
+
+
 def main_loop():
     """
     无限循环
@@ -346,33 +385,9 @@ def main_loop():
     logger.warning("{sep} 开始后台监控，无限循环 {sep}".format(sep="=" * 30))
     while True:
         if is_right_commission_time():
-            if os.path.exists("send_mail.lock"):
-                os.remove("send_mail.lock")
-            logger, old_root_path = get_logger(logger, old_root_path)
-            try:
-                logger.info("{sep} 开始新的一轮监控 {sep}".format(sep="=" * 30))
-                auto_market(client)
-            except Exception as e:
-                logger.error("{sep} 本轮存在异常：{error} {sep}".format(sep="=" * 30, error=e))
-            finally:
-                time.sleep(10)
-        elif is_right_update_history_time() and not os.path.exists("send_mail.lock"):
-            logger.info("已到了指定的分析时间，开始分析当天的交易情况")
-            logger, old_root_path = get_logger(logger, old_root_path)
-            try:
-                update_history_content(client)
-                logger.info("分析完毕，已更新 README.md 以及 trades_log.json")
-                push_to_github()
-                logger.info("已将结果上传到 GitHub 上")
-                send_result_using_email()
-                logger.info("已将结果用邮件发送周知")
-                with open("send_mail.lock", "w") as f:
-                    logger.info("当天的分析已完成，创建 lock 锁")
-                    pass
-            except Exception as e:
-                logger.error("{sep} 记录异常：{error} {sep}".format(sep="=" * 30, error=e))
-            finally:
-                time.sleep(60 * 5)
+            right_commission_time_deal(logger, old_root_path, client)
+        elif is_right_update_history_time():
+            right_update_history_time_deal(logger, old_root_path, client)
         else:
             logger.info("{sep} 还未到指定时间 {sep}".format(sep="=" * 30))
             time.sleep(60 * 5)
