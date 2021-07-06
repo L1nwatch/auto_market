@@ -179,7 +179,7 @@ def set_sell_stop_cmd(client, position):
         if each_keep["当前价"] < round(each_keep["参考成本价"] * 0.82, 2):
             logger.warning("【止损】股票代码：{}，按照成本价：{} 乘以 0.8 后得到的价格委托卖出：{}".format(
                 each_keep["证券代码"], each_keep["参考成本价"], sell_price))
-        set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep, amount=each_keep["可用数量"])
+            set_sell_cmd(client, each_keep["证券代码"], sell_price, stock_info=each_keep, amount=each_keep["可用数量"])
         # else:
         #     logger.info("股票代码：{}，止损价格为{}，目前价格{}还不需要止损".format(each_keep["证券代码"], sell_price, each_keep["当前价"]))
 
