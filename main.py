@@ -27,10 +27,10 @@ def get_balance(client):
     """
     global logger
     logger.debug("获取当前资金情况")
-    while True:
+    for i in range(10):
         try:
             result = client.balance
-            while len(result) <= 0:
+            if i <= 10 and len(result) <= 0:
                 time.sleep(10)
                 logger.error("资金情况获取失败：{}".format(result))
                 result = client.balance
@@ -47,10 +47,10 @@ def get_position(client):
     """
     global logger
     logger.debug("获取当前持仓情况")
-    while True:
+    for i in range(10):
         try:
             result = client.position
-            while len(result) <= 0 or "参考成本价" not in result[0]:
+            if i <= 10 and len(result) <= 0 or "参考成本价" not in result[0]:
                 logger.error("持仓情况获取失败：{}".format(result))
                 login_system()
                 time.sleep(10)
@@ -112,7 +112,7 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
 def get_today_entrusts(client):
     global logger
     logger.debug("获取当日委托情况")
-    while True:
+    for i in range(10):
         try:
             result = list()
             today_entrusts = client.today_entrusts
@@ -130,7 +130,7 @@ def get_today_entrusts(client):
 def get_today_trades(client):
     global logger
     logger.debug("获取当天交易情况")
-    while True:
+    for i in range(10):
         try:
             login_system()
             client.refresh()
@@ -266,14 +266,14 @@ def login_system():
 
 def is_right_commission_time():
     """
-    判断是否为合适的委托时间，一天就运行一个时间段：周一~周五，早上 8:30-9:00
+    判断是否为合适的委托时间，一天就运行一个时间段：周一~周五，早上 9:30-10:00
     """
     now = datetime.datetime.today()
     # 周一到周五
     if not (1 <= now.isoweekday() <= 5):
         return False
     # 小时 && 分钟
-    if now.hour == 8 and 30 <= now.minute <= 59:
+    if now.hour == 9 and 30 <= now.minute <= 59:
         return True
     return False
 
