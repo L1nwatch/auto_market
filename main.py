@@ -148,6 +148,7 @@ def get_today_decision(client):
     if not os.path.exists(final_answer_path):
         import decision
         decision.get_decision(logger, old_root_path)
+        logger.info("已完成今天决策信息的获取")
     with open(final_answer_path, "r") as f:
         final_answer = simplejson.load(f)
 
@@ -266,14 +267,14 @@ def login_system():
 
 def is_right_commission_time():
     """
-    判断是否为合适的委托时间，一天就运行一个时间段：周一~周五，早上 9:30-10:00
+    判断是否为合适的委托时间，一天就运行一个时间段：周一~周五，早上 8:30-9:00
     """
     now = datetime.datetime.today()
     # 周一到周五
     if not (1 <= now.isoweekday() <= 5):
         return False
     # 小时 && 分钟
-    if now.hour == 9 and 30 <= now.minute <= 59:
+    if now.hour == 8 and 30 <= now.minute <= 59:
         return True
     return False
 

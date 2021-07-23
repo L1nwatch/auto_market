@@ -191,7 +191,7 @@ def get_decision(logger=None,old_root_path=None):
         simplejson.dump(final_answer, f)
 
     # 收尾工作
-    bs.logout()
+    # bs.logout()
 
 
 if __name__ == "__main__":
