@@ -27,10 +27,10 @@ def get_balance(client):
     """
     global logger
     logger.debug("获取当前资金情况")
-    while True:
+    for i in range(10):
         try:
             result = client.balance
-            while len(result) <= 0:
+            if i <= 10 and len(result) <= 0:
                 time.sleep(10)
                 logger.error("资金情况获取失败：{}".format(result))
                 result = client.balance
@@ -47,10 +47,10 @@ def get_position(client):
     """
     global logger
     logger.debug("获取当前持仓情况")
-    while True:
+    for i in range(10):
         try:
             result = client.position
-            while len(result) <= 0 or "参考成本价" not in result[0]:
+            if i <= 10 and len(result) <= 0 or "参考成本价" not in result[0]:
                 logger.error("持仓情况获取失败：{}".format(result))
                 login_system()
                 time.sleep(10)
@@ -112,7 +112,7 @@ def set_buy_cmd(client, code, price, *, amount=100, stock_info=None, count_info=
 def get_today_entrusts(client):
     global logger
     logger.debug("获取当日委托情况")
-    while True:
+    for i in range(10):
         try:
             result = list()
             today_entrusts = client.today_entrusts
@@ -130,7 +130,7 @@ def get_today_entrusts(client):
 def get_today_trades(client):
     global logger
     logger.debug("获取当天交易情况")
-    while True:
+    for i in range(10):
         try:
             login_system()
             client.refresh()
@@ -148,6 +148,7 @@ def get_today_decision(client):
     if not os.path.exists(final_answer_path):
         import decision
         decision.get_decision(logger, old_root_path)
+        logger.info("已完成今天决策信息的获取")
     with open(final_answer_path, "r") as f:
         final_answer = simplejson.load(f)
 
