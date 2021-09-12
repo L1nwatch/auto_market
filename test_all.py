@@ -37,3 +37,6 @@ class TestCommon(TestCase):
     def test_update_readme_history(self):
         common.update_readme_history()
 
+    def test_analysis_trades_log(self):
+        common.analysis_trades_log()
+

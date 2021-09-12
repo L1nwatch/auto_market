@@ -106,7 +106,7 @@ def analysis_trades_log():
         trade_date = each_day_trades.pop(0)
         trade_date_code = list()
         for each_trade in each_day_trades:
-            if "证券代码" not in each_trade:
+            if "证券代码" not in each_trade or (each_trade.get("备注") == "未成交"):
                 continue
             code = each_trade["证券代码"]
             if code in trade_date_code:
