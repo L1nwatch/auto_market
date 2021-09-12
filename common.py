@@ -132,8 +132,9 @@ def analysis_trades_log():
                 keep_date_end = datetime.datetime.strptime(trade_date, "%Y-%m-%d")
                 keep_date_start = datetime.datetime.strptime(history[index]["买入日期"][0], "%Y-%m-%d")
                 keep_date = str((keep_date_end - keep_date_start).days)
+                roi = each_trade["成交均价"] / (sum(history[index]["买入价格"]) / len(history[index]["买入价格"])) - 1
                 update_dict = {"卖出日期": trade_date, "卖出价格": each_trade["成交均价"],
-                               "持有天数": keep_date}
+                               "持有天数": keep_date, "价格比": "{:.2%}".format(roi)}
                 history[index].update(update_dict)
                 del trade_index[each_trade["证券代码"]]
 
@@ -145,21 +146,29 @@ def generate_md_content(history_content):
 
 最近一次更新日期为：{}
 
-| 序号 | 股票代码 | 股票名称 | 买入日期 | 买入价格 | 卖出日期 | 卖出价格 | 持有天数 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+总体情况为：{}，详见下表：
+
+| 序号 | 股票代码 | 股票名称 | 买入日期 | 买入价格 | 卖出日期 | 卖出价格 | 持有天数 | 价格比 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 {}
 
 【history_end】"""
     update_date = history_content[0]
+    total_info = "目前共交易过 {} 只股票，其中 {} 只已卖出，平均持有 {:.0f} 天"
+    avg_keep_list = list(filter(lambda x: x.get("持有天数", "?") != "?", history_content[1]))
+    avg_keep_days = sum([int(x["持有天数"]) for x in avg_keep_list]) / len(avg_keep_list)
+    #TODO: 平均价格比
+    # avg_keep_roi = sum([float(x["价格比"]) for x in avg_keep_list]) / len(avg_keep_list)
     history_table = str()
     for each_trade in history_content[1]:
         trade_data = list()
-        for each_field in ["序号", "股票代码", "股票名称", "买入日期", "买入价格", "卖出日期", "卖出价格", "持有天数"]:
+        for each_field in ["序号", "股票代码", "股票名称", "买入日期", "买入价格", "卖出日期", "卖出价格", "持有天数", "价格比"]:
             trade_data.append(str(each_trade.get(each_field, "?")))
 
         content = "|".join(trade_data)
         history_table += "|" + content + "|\n"
-    return result.format(update_date, history_table)
+    total_info = total_info.format(len(history_content[1]), len(avg_keep_list), avg_keep_days)
+    return result.format(update_date, total_info, history_table)
 
 
 def update_readme_history():
