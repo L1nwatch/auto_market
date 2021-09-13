@@ -154,11 +154,10 @@ def generate_md_content(history_content):
 
 【history_end】"""
     update_date = history_content[0]
-    total_info = "目前共交易过 {} 只股票，其中 {} 只已卖出，平均持有 {:.0f} 天"
+    total_info = "目前共交易过 {} 只股票，其中 {} 只已卖出，平均持有 {:.0f} 天，平均价格差为 {:.2}%"
     avg_keep_list = list(filter(lambda x: x.get("持有天数", "?") != "?", history_content[1]))
     avg_keep_days = sum([int(x["持有天数"]) for x in avg_keep_list]) / len(avg_keep_list)
-    #TODO: 平均价格比
-    # avg_keep_roi = sum([float(x["价格比"]) for x in avg_keep_list]) / len(avg_keep_list)
+    avg_keep_roi = sum([float(x["价格比"][:-1]) for x in avg_keep_list]) / len(avg_keep_list)
     history_table = str()
     for each_trade in history_content[1]:
         trade_data = list()
@@ -167,7 +166,7 @@ def generate_md_content(history_content):
 
         content = "|".join(trade_data)
         history_table += "|" + content + "|\n"
-    total_info = total_info.format(len(history_content[1]), len(avg_keep_list), avg_keep_days)
+    total_info = total_info.format(len(history_content[1]), len(avg_keep_list), avg_keep_days, avg_keep_roi)
     return result.format(update_date, total_info, history_table)
 
 
