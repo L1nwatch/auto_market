@@ -1,8 +1,8 @@
 ```mermaid
 flowchart TD
     A[GitHub Repository] --> B[GitHub Actions Workflow]
-    B --> C[Self-Hosted Runner (Mac Mini)]
-    C --> D[main.py Script]
+    B --> C[Self-Hosted Runner]
+    C --> D[Python Script (main.py)]
     D --> E[SQLite Database]
     E --> F[Web Dashboard]
     F -->|Display Results| G((User))
@@ -14,5 +14,4 @@ flowchart TD
     style E fill:#faa,stroke:#333,stroke-width:2px
     style F fill:#aff,stroke:#333,stroke-width:2px
     style G fill:#ccc,stroke:#333,stroke-width:2px
-
 ```
