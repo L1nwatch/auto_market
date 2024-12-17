@@ -2,10 +2,10 @@
 flowchart TD
     A[GitHub Repository] --> B[GitHub Actions Workflow]
     B --> C[Self-Hosted Runner]
-    C --> D[Python Script (main.py)]
+    C --> D[Python Script: main.py]
     D --> E[SQLite Database]
     E --> F[Web Dashboard]
-    F -->|Display Results| G((User))
+    F --> G[User]
 
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style B fill:#bbf,stroke:#333,stroke-width:2px
