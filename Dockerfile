@@ -1,5 +1,7 @@
 FROM ubuntu:20.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install required dependencies
 RUN apt-get update && apt-get install -y \
     curl \
@@ -8,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     sudo && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y libicu-dev && \
+RUN apt-get update && \
+    apt-get install -y libicu-dev tzdata && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set up a directory for the runner
@@ -35,3 +38,4 @@ USER runner
 
 # Set entrypoint
 ENTRYPOINT ["/runner/entrypoint.sh"]
+#CMD ["/bin/bash"]
