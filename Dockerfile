@@ -20,5 +20,15 @@ RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/
 COPY entrypoint.sh /runner/entrypoint.sh
 RUN chmod +x /runner/entrypoint.sh
 
+# Create a non-root user and group
+RUN groupadd --gid 1001 runner && \
+    useradd --uid 1001 --gid runner --shell /bin/bash --create-home runner
+
+# Change ownership of the /runner directory to the non-root user
+RUN chown -R runner:runner /runner
+
+# Switch to the non-root user
+USER runner
+
 # Set entrypoint
 ENTRYPOINT ["/runner/entrypoint.sh"]
