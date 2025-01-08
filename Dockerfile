@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /runner
 
 # Download and extract the GitHub Actions runner
-RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.310.0/actions-runner-linux-x64-2.310.0.tar.gz && \
+RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-arm64-2.321.0.tar.gz && \
     tar xzf actions-runner.tar.gz && \
     rm actions-runner.tar.gz
 
