@@ -1,0 +1,23 @@
+name: Test Self-Hosted Runner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-runner:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Print Runner Info
+        run: |
+          echo "Running on self-hosted runner"
+          uname -a
+
+      - name: List Directory Contents
+        run: |
+          echo "Listing contents of the runner's workspace:"
+          ls -al
