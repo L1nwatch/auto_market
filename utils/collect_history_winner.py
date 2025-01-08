@@ -6,6 +6,7 @@
 import requests
 import json
 import os
+from loguru import logger
 from tqdm import tqdm
 from datetime import datetime, timedelta
 from utils.common import root
@@ -15,6 +16,11 @@ from utils.custom_db import MySQLite
 __author__ = '__L1n__w@tch'
 
 MY_DB = MySQLite()
+
+# proxies = {
+#     "http": "http://127.0.0.1:6152",  # HTTP proxy
+#     "https": "http://127.0.0.1:6152"  # HTTPS proxy
+# }
 
 
 def is_result_exist(year):
@@ -27,7 +33,7 @@ def is_result_exist(year):
             with open(local_file, "r") as f:
                 data = json.load(f)
             if str(year) in data:
-                save_results(data, year)
+                MY_DB.save_results(data, year)
                 return True
         pass
     return MY_DB.check_lotto_result_exist(year)
@@ -38,8 +44,12 @@ def history_year(end_year):
 
     for year in tqdm(range(1982, end_year + 1)):
         if is_result_exist(year):
+            logger.info(f"{year} data already exist")
             continue
-        base_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?annee={year}&widget=resultats-anterieurs&noProduit=212#res"
+        logger.info(f"Start to fetch {year} data")
+        base_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?annee={year}&widget=resultats-anterieurs&noPro" \
+                   f"duit=212#res"
+        # response = requests.get(base_url, proxies=proxies)
         response = requests.get(base_url)
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -56,11 +66,12 @@ def history_year(end_year):
 
                     data[date] = data.get(date, dict())
                     data[date][mark_name] = data[date].get(mark_name, list())
-                    data[date][mark_name].append(each_div.text)
+                    lotto_result = str(each_div.text).strip().split()
+                    data[date][mark_name].append(lotto_result)
             except Exception as e:
                 print(e)
 
-        save_results(data, year)
+        MY_DB.save_results(data, year)
 
 
 def get_current_results_date():
@@ -94,5 +105,5 @@ def current_year():
 
 
 if __name__ == "__main__":
-    # history_year()
-    current_year()
+    history_year(2024)
+    # current_year()

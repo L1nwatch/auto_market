@@ -4,6 +4,7 @@
 """ Description
 """
 import os
+import json
 import sqlite3
 from utils.common import root
 
@@ -34,6 +35,16 @@ class MySQLite:
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         return len(result) > 0
+
+    def save_results(self, data, expected_year):
+        for date, value in data.items():
+            year, month, day = date.split("-")
+            if str(year) != str(expected_year):
+                continue
+            value = json.dumps(value)
+            sql = f"INSERT INTO history_lotto (year, month, day, data) VALUES ({year}, {month}, {day}, '{value}')"
+            self.cursor.execute(sql)
+            self.conn.commit()
 
 
 if __name__ == "__main__":
