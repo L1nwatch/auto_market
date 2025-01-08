@@ -14,6 +14,10 @@ RUN apt-get update && \
     apt-get install -y libicu-dev tzdata && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y sqlite3 libsqlite3-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
 # Set up a directory for the runner
 WORKDIR /runner
 
