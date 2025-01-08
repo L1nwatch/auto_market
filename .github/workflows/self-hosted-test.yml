@@ -1,23 +1,26 @@
-name: Test Self-Hosted Runner
+name: Run auto_lotto_main.py Daily
 
+# Define the schedule to run the workflow daily
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    # Runs every day at 00:00 UTC (adjust to your preferred time)
+    - cron: '0 0 * * *'
 
 jobs:
-  test-runner:
+  run-auto-lotto:
     runs-on: self-hosted
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Print Runner Info
-        run: |
-          echo "Running on self-hosted runner"
-          uname -a
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9' # Adjust to the version your script requires
 
-      - name: List Directory Contents
+      - name: Install Dependencies
         run: |
-          echo "Listing contents of the runner's workspace:"
-          ls -al
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run auto_lotto_main.py
+        run: python auto_lotto_main.py
