@@ -1,10 +1,11 @@
 name: Run auto_lotto_main.py Daily
 
-# Define the schedule to run the workflow daily
+# Define triggers: scheduled and manual
 on:
   schedule:
-    # Runs every day at 00:00 UTC (adjust to your preferred time)
+    # Runs daily at 00:00 UTC
     - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   run-auto-lotto:

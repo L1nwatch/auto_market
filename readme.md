@@ -1,5 +1,7 @@
 # Auto Market
 
+[![Run auto_lotto_main.py Daily](https://github.com/L1nwatch/auto_market/actions/workflows/self-hosted-test.yml/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/self-hosted-test.yml)
+
 ## Project1: Auto Lotto
 
 ### Design Overview
