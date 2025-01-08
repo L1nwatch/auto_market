@@ -5,18 +5,40 @@
 """
 import requests
 import json
+import os
 from tqdm import tqdm
 from datetime import datetime, timedelta
+from utils.common import root
 from bs4 import BeautifulSoup
+from utils.custom_db import MySQLite
 
 __author__ = '__L1n__w@tch'
 
+MY_DB = MySQLite()
 
-def history_year():
+
+def is_result_exist(year):
+    global MY_DB
+    exist = MY_DB.check_lotto_result_exist(year)
+    if not exist:
+        # try to update db from local file
+        local_file = os.path.join(root, "data", "history_winner.json")
+        if os.path.exists(local_file):
+            with open(local_file, "r") as f:
+                data = json.load(f)
+            if str(year) in data:
+                save_results(data, year)
+                return True
+        pass
+    return MY_DB.check_lotto_result_exist(year)
+
+
+def history_year(end_year):
     data = {}
-    history_winner_file = "history_winner.json"
 
-    for year in tqdm(range(1982, 2024)):
+    for year in tqdm(range(1982, end_year + 1)):
+        if is_result_exist(year):
+            continue
         base_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?annee={year}&widget=resultats-anterieurs&noProduit=212#res"
         response = requests.get(base_url)
 
@@ -38,8 +60,7 @@ def history_year():
             except Exception as e:
                 print(e)
 
-        with open(history_winner_file, "w") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+        save_results(data, year)
 
 
 def get_current_results_date():
@@ -56,7 +77,7 @@ def get_current_results_date():
 
 
 def current_year():
-    saved_file = "current_winner.json"
+    saved_file = "../data/current_winner.json"
     data = dict()
     dates = get_current_results_date()
     for each_date in dates:
