@@ -1,6 +1,8 @@
 # Auto Market
 
-[![Run auto_lotto_main.py Daily](https://github.com/L1nwatch/auto_market/actions/workflows/self-hosted-test.yml/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/self-hosted-test.yml)
+[![Run auto_lotto_main.py Daily](https://github.com/L1nwatch/auto_market/actions/workflows/daily-run-main.yml/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/daily-run-main.yml)
+
+[![pages-build-deployment](https://github.com/L1nwatch/auto_market/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/pages/pages-build-deployment)
 
 ## Project1: Auto Lotto
 
