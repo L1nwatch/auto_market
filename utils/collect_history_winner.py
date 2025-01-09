@@ -17,10 +17,10 @@ __author__ = '__L1n__w@tch'
 
 MY_DB = MySQLite()
 
-proxies = {
-    "http": "http://127.0.0.1:6152",  # HTTP proxy
-    "https": "http://127.0.0.1:6152"  # HTTPS proxy
-}
+# proxies = {
+#     "http": "http://127.0.0.1:6152",  # HTTP proxy
+#     "https": "http://127.0.0.1:6152"  # HTTPS proxy
+# }
 
 
 def is_result_exist(year):
@@ -79,7 +79,8 @@ def get_current_results_date(year):
     for month in range(1, 13):
         start_date = f"{year}-{month:02}-01"
         basic_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?widget=resultats&action=historique&noproduit=212&date={start_date}"
-        response = requests.get(basic_url, proxies=proxies)
+        # response = requests.get(basic_url, proxies=proxies)
+        response = requests.get(basic_url)
         soup = BeautifulSoup(response.text, 'html.parser')
         dates = soup.find_all("div", class_="dateTirage")
         if len(dates) < 1:
@@ -95,7 +96,8 @@ def current_year(year):
     for each_date in dates:
         data[each_date] = dict()
         base_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?date={each_date}"
-        response = requests.get(base_url, proxies=proxies)
+        # response = requests.get(base_url, proxies=proxies)
+        response = requests.get(base_url)
         soup = BeautifulSoup(response.text, 'html.parser')
         divs = soup.find_all("div", class_="lqZoneStructuresDeLots")
         for i, each_div in enumerate(divs):
