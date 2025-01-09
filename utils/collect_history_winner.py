@@ -17,6 +17,7 @@ __author__ = '__L1n__w@tch'
 
 MY_DB = MySQLite()
 
+
 # proxies = {
 #     "http": "http://127.0.0.1:6152",  # HTTP proxy
 #     "https": "http://127.0.0.1:6152"  # HTTPS proxy
@@ -74,10 +75,10 @@ def history_year(end_year):
         MY_DB.save_results(data, year)
 
 
-def get_current_results_date():
+def get_current_results_date(year):
     result = list()
     for month in range(1, 13):
-        start_date = f"2024-{month:02}-01"
+        start_date = f"{year}-{month:02}-01"
         basic_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?widget=resultats&action=historique&noproduit=212&date={start_date}"
         response = requests.get(basic_url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -87,10 +88,9 @@ def get_current_results_date():
     return result
 
 
-def current_year():
-    saved_file = "../data/current_winner.json"
+def current_year(year):
     data = dict()
-    dates = get_current_results_date()
+    dates = get_current_results_date(year)
     for each_date in dates:
         data[each_date] = dict()
         base_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?date={each_date}"
@@ -100,10 +100,10 @@ def current_year():
         for i, each_div in enumerate(divs):
             data[each_date][i] = each_div.text.strip()
 
-        with open(saved_file, "w") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+    if len(data) > 0:
+        MY_DB.save_results(data, year)
 
 
 if __name__ == "__main__":
-    history_year(2024)
-    # current_year()
+    # history_year(2024)
+    current_year(2025)

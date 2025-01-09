@@ -37,7 +37,7 @@ def fetch_history_data():
     history_year(end_year=today.year - 1)
 
     logger.info("Start to fetch current year lotto data")
-    # current_year()
+    current_year(today.year)
 
 
 def main():
