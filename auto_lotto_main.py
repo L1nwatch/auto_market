@@ -3,6 +3,7 @@
 # version: Python3.X
 """ Description
 """
+import random
 import datetime
 from utils.common import logger
 from utils.collect_history_winner import history_year, current_year
@@ -15,14 +16,23 @@ def update_html_with_win_status_and_predict_number():
     pass
 
 
-def auto_purchase_lotto():
+def auto_purchase_lotto(number):
     logger.info("Start to auto purchase lotto")
+    print(number)
     pass
 
 
 def predict_next_lotto():
     logger.info("Start to predict next lotto")
-    pass
+    # manually generate for now
+    numbers = [
+        "05 12 19 23 34 48 (17)",
+        "03 09 22 28 37 45 (06)",
+        "07 11 20 26 40 46 (14)",
+        "01 15 25 33 38 42 (10)",
+        "08 13 24 30 39 47 (03)"
+    ]
+    return random.choice(numbers)
 
 
 def check_win_status():
@@ -34,17 +44,18 @@ def fetch_history_data():
     today = datetime.datetime.now()
 
     logger.info("Start to fetch history year lotto data")
-    history_year(end_year=today.year - 1)
+    history_year(end_year=today.year - 2)
 
     logger.info("Start to fetch current year lotto data")
-    current_year(today.year)
+    for i in range(1, -1, -1):
+        current_year(today.year - i)
 
 
 def main():
     fetch_history_data()
     check_win_status()
-    predict_next_lotto()
-    auto_purchase_lotto()
+    number = predict_next_lotto()
+    auto_purchase_lotto(number)
     update_html_with_win_status_and_predict_number()
 
 
