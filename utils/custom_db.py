@@ -30,8 +30,12 @@ class MySQLite:
         self.cursor.execute(sql)
         self.conn.commit()
 
-    def check_lotto_result_exist(self, year):
+    def check_lotto_result_exist(self, *, year, month, day):
         sql = f"SELECT * FROM history_lotto WHERE year = {year}"
+        if month:
+            sql += f" AND month = {month}"
+        if day:
+            sql += f" AND day = {day}"
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         return len(result) > 0
@@ -40,6 +44,8 @@ class MySQLite:
         for date, value in data.items():
             year, month, day = date.split("-")
             if str(year) != str(expected_year):
+                continue
+            if self.check_lotto_result_exist(year=year, month=month, day=day):
                 continue
             value = json.dumps(value)
             sql = f"INSERT INTO history_lotto (year, month, day, data) VALUES ({year}, {month}, {day}, '{value}')"

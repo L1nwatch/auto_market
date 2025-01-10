@@ -44,11 +44,10 @@ def fetch_history_data():
     today = datetime.datetime.now()
 
     logger.info("Start to fetch history year lotto data")
-    history_year(end_year=today.year - 2)
+    history_year(end_year=today.year - 1)
 
     logger.info("Start to fetch current year lotto data")
-    for i in range(1, -1, -1):
-        current_year(today.year - i)
+    current_year(today.year)
 
 
 def main():
