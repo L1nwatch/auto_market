@@ -3,10 +3,11 @@
 # version: Python3.X
 """ Description
 """
-import random
 import datetime
 from utils.common import logger
+from utils.llm_predict import LargeLanguageModel
 from utils.collect_history_winner import history_year, current_year
+from utils.custom_db import MyLottoDB
 
 __author__ = '__L1n__w@tch'
 
@@ -24,19 +25,16 @@ def auto_purchase_lotto(number):
 
 def predict_next_lotto():
     logger.info("Start to predict next lotto")
-    # manually generate for now
-    numbers = [
-        "05 12 19 23 34 48 (17)",
-        "03 09 22 28 37 45 (06)",
-        "07 11 20 26 40 46 (14)",
-        "01 15 25 33 38 42 (10)",
-        "08 13 24 30 39 47 (03)"
-    ]
-    return random.choice(numbers)
+
+    llm = LargeLanguageModel()
+    my_db = MyLottoDB()
+    recent_win = my_db.get_recent_lotto_win_numbers()
+    numbers = llm.predict(recent_win)
+    return numbers
 
 
 def check_win_status():
-    logger.info("Start to check win status")
+    logger.info("Start to check win status -- Not implemented yet")
     pass
 
 

@@ -5,13 +5,14 @@
 """
 import os
 import json
+import re
 import sqlite3
 from utils.common import root
 
 __author__ = '__L1n__w@tch'
 
 
-class MySQLite:
+class MyLottoDB:
     def __init__(self):
         self.conn = sqlite3.connect(os.path.join(root, "data", "lotto.db"))
         self.cursor = self.conn.cursor()
@@ -39,6 +40,18 @@ class MySQLite:
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         return len(result) > 0
+
+    def get_recent_lotto_win_numbers(self):
+        results = dict()
+        sql = "SELECT * FROM history_lotto ORDER BY year DESC, month DESC, day DESC LIMIT 24"
+        self.cursor.execute(sql)
+        raw_data = self.cursor.fetchall()
+        for data in raw_data:
+            year, month, day, value = data[1], data[2], data[3], data[4]
+            value = json.loads(value)
+            value = re.findall(r"\d{2}", value["0"])
+            results[f"{year}-{month:02}-{day:02}"] = value
+        return results
 
     def save_results(self, data, expected_year):
         for date, value in data.items():

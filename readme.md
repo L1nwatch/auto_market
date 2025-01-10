@@ -42,6 +42,17 @@ flowchart TD
     style M fill:#bfb,stroke:#333,stroke-width:2px
 ```
 
+### How to run daily
+
+1. create a GitHub actions self-hosted runner
+
+```shell
+docker build -t auto_lotto_runner .
+docker run -d -e RUNNER_TOKEN="$RUNNER_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" auto_lotto_runner
+```
+
+2. run the main script: `auto_lotto_main.py`
+
 ## Project2: Auto Stock Trading
 
 [details](./auto_stock/README.md)
