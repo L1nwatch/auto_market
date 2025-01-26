@@ -23,7 +23,7 @@ class LargeLanguageModel:
         data = {
             "model": "deepseek-r1:14b",
             "prompt": json.dumps(prompt),
-            "temperature": 0
+            "temperature": 0.5
         }
         try:
             response = requests.post(url, json=data)
