@@ -95,12 +95,20 @@ def fetch_history_data():
     return last_lotto_date
 
 
+def git_commit_and_push():
+    import os
+    os.system("git add .")
+    os.system("git commit -m 'auto commit'")
+    os.system("git push")
+
+
 def main():
     last_lotto_date = fetch_history_data()
     check_win_status()
     number = predict_next_lotto(last_lotto_date)
     auto_purchase_lotto(last_lotto_date, number)
     update_html_with_win_status_and_predict_number(last_lotto_date)
+    git_commit_and_push()
 
 
 if __name__ == "__main__":
