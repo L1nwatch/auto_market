@@ -21,7 +21,7 @@ class LargeLanguageModel:
     def deepseek_request(self, prompt):
         url = f"http://{self.host}:8080/api/generate"
         data = {
-            "model": "deepseek-r1:32b",
+            "model": "deepseek-r1:14b",
             "prompt": json.dumps(prompt),
             "temperature": 0.5
         }
