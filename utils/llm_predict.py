@@ -22,7 +22,7 @@ class LargeLanguageModel:
         url = "http://host.docker.internal:8080/api/generate"
         data = {
             "model": "deepseek-r1",
-            "prompt": prompt
+            "prompt": "hello"
         }
         try:
             response = requests.post(url, json=data)
