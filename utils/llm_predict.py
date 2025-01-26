@@ -5,6 +5,8 @@
 """
 import openai
 import os
+import requests
+import json
 from loguru import logger
 
 __author__ = '__L1n__w@tch'
@@ -14,10 +16,25 @@ ai_key = os.getenv("OPENAI_API_KEY")
 
 class LargeLanguageModel:
     def __init__(self):
-        self.client = openai.OpenAI(api_key=ai_key)
+        pass
+
+    def deepseek_request(self, prompt):
+        url = "http://host.docker.internal:8080/api/generate"
+        data = {
+            "model": "deepseek-r1",
+            "prompt": prompt
+        }
+        try:
+            response = requests.post(url, json=data)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            result = response.json()  # Parse JSON response
+            return result
+        except requests.exceptions.RequestException as e:
+            return f"Error interacting with Ollama API: {e}"
 
     def openai_request(self, prompt):
-        completion = self.client.chat.completions.create(
+        client = openai.OpenAI(api_key=ai_key)
+        completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are an assistant that responds with valid JSON only."},
@@ -37,7 +54,7 @@ class LargeLanguageModel:
         logger.info(f"Prompt: {prompt}")
         # send prompt to model and get numbers
         logger.info("send prompt to model and get numbers")
-        response = self.openai_request(prompt)
+        response = self.deepseek_request(prompt)
         return response
 
 
