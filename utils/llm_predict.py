@@ -28,7 +28,12 @@ class LargeLanguageModel:
             response = requests.post(url, json=data)
             response.raise_for_status()  # Raise an exception for HTTP errors
             result = response.text
-            return result
+            logger.info("[DeepSeek] Response: {}".format(result))
+
+            json_objects = [json.loads(line) for line in result.splitlines()]
+            final_response = "".join([obj["response"] for obj in json_objects if "response" in obj])
+
+            return final_response
         except requests.exceptions.RequestException as e:
             return f"Error interacting with Ollama API: {e}"
 
