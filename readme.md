@@ -47,8 +47,8 @@ flowchart TD
 1. create a GitHub actions self-hosted runner
 
 ```shell
-docker build -t auto_lotto_runner .
-docker run -d -e RUNNER_TOKEN="$RUNNER_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" auto_lotto_runner
+docker build -f github-runner.Dockerfile --build-arg OPENAI_API_KEY="$OPENAI_API_KEY" --build-arg RUNNER_TOKEN="$RUNNER_TOKEN" -t auto-lotto-github-runner .
+docker run -d auto-lotto-github-runner
 ```
 
 2. run the main script: `auto_lotto_main.py`

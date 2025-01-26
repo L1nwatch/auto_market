@@ -26,7 +26,7 @@ def auto_purchase_lotto(number):
 def predict_next_lotto():
     logger.info("Start to predict next lotto")
 
-    llm = LargeLanguageModel()
+    llm = LargeLanguageModel(model="openai")
     my_db = MyLottoDB()
     recent_win = my_db.get_recent_lotto_win_numbers()
     numbers = llm.predict(recent_win)

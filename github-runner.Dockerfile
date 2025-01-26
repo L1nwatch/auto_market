@@ -26,6 +26,12 @@ RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/
     tar xzf actions-runner.tar.gz && \
     rm actions-runner.tar.gz
 
+# Set the API key using a build argument
+ARG OPENAI_API_KEY
+ARG RUNNER_TOKEN
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+ENV RUNNER_TOKEN=$RUNNER_TOKEN
+
 # Copy entrypoint script
 COPY entrypoint.sh /runner/entrypoint.sh
 RUN chmod +x /runner/entrypoint.sh

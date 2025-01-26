@@ -15,8 +15,9 @@ ai_key = os.getenv("OPENAI_API_KEY")
 
 
 class LargeLanguageModel:
-    def __init__(self, host="host.docker.internal"):
+    def __init__(self, host="host.docker.internal", model="deepseek"):
         self.host = host
+        self.model = model
 
     def deepseek_request(self, prompt):
         url = f"http://{self.host}:8080/api/generate"
@@ -44,7 +45,7 @@ class LargeLanguageModel:
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are an assistant that responds with valid JSON only."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": json.dumps(prompt)}
             ],
             response_format={"type": "json_object"}
         )
@@ -60,7 +61,10 @@ class LargeLanguageModel:
         logger.info(f"Prompt: {prompt}")
         # send prompt to model and get numbers
         logger.info("send prompt to model and get numbers")
-        response = self.deepseek_request(prompt)
+        if self.model == "deepseek":
+            response = self.deepseek_request(prompt)
+        else:
+            response = self.openai_request(prompt)
         return response
 
 
