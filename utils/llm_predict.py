@@ -15,20 +15,20 @@ ai_key = os.getenv("OPENAI_API_KEY")
 
 
 class LargeLanguageModel:
-    def __init__(self):
-        pass
+    def __init__(self, host="host.docker.internal"):
+        self.host = host
 
     def deepseek_request(self, prompt):
-        url = "http://host.docker.internal:8080/api/generate"
+        url = f"http://{self.host}:8080/api/generate"
         data = {
-            "model": "deepseek-r1",
+            "model": "deepseek-r1:8b",
             "prompt": json.dumps(prompt)
         }
         try:
             response = requests.post(url, json=data)
             response.raise_for_status()  # Raise an exception for HTTP errors
             result = response.text
-            logger.info("[DeepSeek] Response: {}".format(result))
+            # logger.info("[DeepSeek] Response: {}".format(result))
 
             json_objects = [json.loads(line) for line in result.splitlines()]
             final_response = "".join([obj["response"] for obj in json_objects if "response" in obj])
