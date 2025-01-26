@@ -8,16 +8,17 @@ import os
 import requests
 import json
 from loguru import logger
+from utils.custom_db import MyLottoDB
 
 __author__ = '__L1n__w@tch'
 
 ai_key = os.getenv("OPENAI_API_KEY")
 
-
 class LargeLanguageModel:
     def __init__(self, host="host.docker.internal", model="deepseek"):
         self.host = host
         self.model = model
+        self.db = MyLottoDB()
 
     def deepseek_request(self, prompt):
         url = f"http://{self.host}:8080/api/generate"
@@ -51,12 +52,12 @@ class LargeLanguageModel:
         )
         return completion.choices[0].message.content
 
-    def predict(self, history_data):
+    def predict(self, history_data, last_lotto_date):
         prompt = {
             "background": "The following dataset contains 24 groups of numbers. Each group consists of 6 main numbers and 1 special number, all selected from the range 01 to 49.",
             "dataset": history_data,
-            "task": "1. Analyze the dataset to identify any patterns or characteristics in how the numbers are selected. 2. Summarize the patterns observed in the main numbers and the special numbers. 3. Generate 5 new groups of numbers that follow the identified patterns.",
-            "response_format": "{'generate_nums': ['01', '02', '03, '04', '05', '06', '07']}"
+            "task": "0. Ignores the special number. 1. Analyze the dataset to identify any patterns or characteristics in how the numbers are selected. 2. Summarize the patterns observed in the main numbers and the special numbers. 3. Generate 5 new groups of numbers that follow the identified patterns.",
+            "response_format": "{'generate_nums': ['01', '02', '03, '04', '05', '06']}"
         }
         logger.info(f"Prompt: {prompt}")
         # send prompt to model and get numbers
@@ -65,6 +66,7 @@ class LargeLanguageModel:
             response = self.deepseek_request(prompt)
         else:
             response = self.openai_request(prompt)
+        self.db.save_predict_nums(last_lotto_date, prompt, response)
         return response
 
 

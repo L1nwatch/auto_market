@@ -11,31 +11,75 @@ from utils.custom_db import MyLottoDB
 
 __author__ = '__L1n__w@tch'
 
+MY_DB = MyLottoDB()
 
-def update_html_with_win_status_and_predict_number():
+
+def update_html_with_win_status_and_predict_number(last_lotto_date):
     logger.info("Start to update html with win status and predict number")
-    pass
+
+    all_buying_history = MY_DB.get_all_buying_history()
+    for each_data in all_buying_history:
+        predict_nums = MY_DB.get_predict_nums(each_data["last_lotto_date"])
+        each_data["predict_nums"] = predict_nums
+
+    # format to html
+    format_buying_history = []
+    for each_data in all_buying_history:
+        one_row = list()
+        one_row.append(f"<td>{each_data['last_lotto_date']}</td>")
+        one_row.append(f"<td>{each_data['bought_numbers']}</td>")
+        one_row.append(f"<td>{each_data['win_status']}</td>")
+        one_row.append(f"<td>{each_data['predict_nums']}</td>")
+        format_buying_history.append(f"<tr>{''.join(one_row)}</tr>")
+
+    # update to html
+    with open("docs/index_template.html", "r") as f:
+        html = f.read()
+        html = html.replace("{{ need_to_be_replaced }}", "\n".join(format_buying_history))
+    with open("docs/index.html", "w") as f:
+        f.write(html)
 
 
-def auto_purchase_lotto(number):
+def auto_purchase_lotto(last_lotto_date, number):
     logger.info("Start to auto purchase lotto")
-    print(number)
-    pass
+    if not MY_DB.check_buying_history_exist(last_lotto_date):
+        logger.info(f"Start to buy lotto: {number}")
+        # do_buying(last_lotto_date, number) # TODO: manual buying for now
+        # MY_DB.save_buying_history(last_lotto_date, number) # TODO: manual buying for now
+    else:
+        logger.info(f"Already bought lotto for {last_lotto_date}")
 
 
-def predict_next_lotto():
+def predict_next_lotto(last_lotto_date):
     logger.info("Start to predict next lotto")
+    # check if already have numbers
+    predict_nums = MY_DB.get_predict_nums(last_lotto_date)
+    if predict_nums:
+        logger.info(f"Already have predict numbers: {predict_nums}")
+        return predict_nums
 
     llm = LargeLanguageModel(model="openai")
-    my_db = MyLottoDB()
-    recent_win = my_db.get_recent_lotto_win_numbers()
-    numbers = llm.predict(recent_win)
+    recent_win = MY_DB.get_recent_lotto_win_numbers()
+    numbers = llm.predict(recent_win, last_lotto_date)
     return numbers
 
 
 def check_win_status():
-    logger.info("Start to check win status -- Not implemented yet")
-    pass
+    logger.info("Start to check win status")
+    all_buying_history = MY_DB.get_all_buying_history()
+    for each_data in all_buying_history:
+        if each_data["win_status"] != "empty":
+            continue
+        logger.info(f"Check win status for {each_data['last_lotto_date']}")
+        next_date = MY_DB.get_next_date(each_data["last_lotto_date"])
+        if not next_date:
+            logger.info(f"still waiting for {each_data['last_lotto_date']} result")
+            continue
+        year, month, day = next_date["year"], next_date["month"], next_date["day"]
+        check, result = MY_DB.check_lotto_result_exist(year=year, month=month, day=day, need_result=True)
+        if not check:
+            continue
+        MY_DB.update_win_status(each_data["last_lotto_date"], win_status="empty")  # TODO: check win status
 
 
 def fetch_history_data():
@@ -47,13 +91,16 @@ def fetch_history_data():
     logger.info("Start to fetch current year lotto data")
     current_year(today.year)
 
+    last_lotto_date = MY_DB.get_last_lotto_date()
+    return last_lotto_date
+
 
 def main():
-    fetch_history_data()
+    last_lotto_date = fetch_history_data()
     check_win_status()
-    number = predict_next_lotto()
-    auto_purchase_lotto(number)
-    update_html_with_win_status_and_predict_number()
+    number = predict_next_lotto(last_lotto_date)
+    auto_purchase_lotto(last_lotto_date, number)
+    update_html_with_win_status_and_predict_number(last_lotto_date)
 
 
 if __name__ == "__main__":
