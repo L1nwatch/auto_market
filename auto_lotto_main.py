@@ -77,6 +77,7 @@ def predict_next_lotto(last_lotto_date):
         llm = LargeLanguageModel(model="openai")
         recent_win = MY_DB.get_recent_lotto_win_numbers()
         predict_nums = llm.predict(recent_win, last_lotto_date)
+        logger.info(f"Predict numbers: {predict_nums}")
     return format_number(predict_nums)
 
 
@@ -99,7 +100,8 @@ def check_win_status():
         bought_numbers = re.findall(r"\d+", each_data["bought_numbers"])
         win_number = json.loads(result[0]["data"])["0"]
         count = sum([1 for each_bought_number in bought_numbers if each_bought_number in win_number])
-        MY_DB.update_win_status(each_data["last_lotto_date"], win_status=f"match {count} number, win number: {win_number}")
+        MY_DB.update_win_status(each_data["last_lotto_date"],
+                                win_status=f"match {count} number, win number: {win_number}")
 
 
 def fetch_history_data():
@@ -122,7 +124,13 @@ def git_commit_and_push():
     os.system("git push")
 
 
+def git_reset():
+    logger.info("Start to git reset")
+    os.system("git reset --hard HEAD^")
+
+
 def main():
+    git_reset()
     last_lotto_date = fetch_history_data()
     check_win_status()
     number = predict_next_lotto(last_lotto_date)
