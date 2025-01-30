@@ -96,6 +96,7 @@ def fetch_history_data():
 
 
 def git_commit_and_push():
+    logger.info("Start to git commit and push")
     import os
     os.system("git add .")
     os.system("git commit -m 'auto commit'")
