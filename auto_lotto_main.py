@@ -45,7 +45,7 @@ def update_html_with_win_status_and_predict_number(last_lotto_date):
 def auto_purchase_lotto(last_lotto_date, number):
     logger.info(f"Start to auto purchase lotto: {number}")
     if not MY_DB.check_buying_history_exist(last_lotto_date):
-        logger.info(f"Start to buy lotto: {number}")
+        logger.info(f"Start to buy lotto")
         # do_buying(last_lotto_date, number) # TODO: manual buying for now
         MY_DB.save_buying_history(last_lotto_date, number)
     else:
