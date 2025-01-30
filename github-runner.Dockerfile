@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libasound2 \
     libatk-bridge2.0-0 \
+    fonts-liberation \
+    libappindicator3-1 \
     libgbm1 \
     chromium-browser \
     chromium-chromedriver \
