@@ -45,7 +45,7 @@ def auto_purchase_lotto(last_lotto_date, number):
     if not MY_DB.check_buying_history_exist(last_lotto_date):
         logger.info(f"Start to buy lotto: {number}")
         # do_buying(last_lotto_date, number) # TODO: manual buying for now
-        # MY_DB.save_buying_history(last_lotto_date, number) # TODO: manual buying for now
+        MY_DB.save_buying_history(last_lotto_date, number) # TODO: manual buying for now
     else:
         logger.info(f"Already bought lotto for {last_lotto_date}")
 
