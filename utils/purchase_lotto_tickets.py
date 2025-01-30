@@ -9,7 +9,6 @@ __author__ = '__L1n__w@tch'
 import time
 import os
 import traceback
-import platform
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -22,18 +21,7 @@ from utils.common import logger
 lotto_user = os.getenv("LOTTO_USER")
 lotto_password = os.getenv("LOTTO_PASSWORD")
 
-# Detect system architecture
-arch = platform.machine()
-logger.info(f"Detected architecture: {arch}")
-
-# Define the correct ChromeDriver path
-if arch in ["aarch64", "arm64"]:
-    logger.info("Using ARM64 ChromeDriver...")
-    chromedriver_path = ChromeDriverManager(
-        url="https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip").install()
-else:
-    logger.info("Using default ChromeDriver for x86_64...")
-    chromedriver_path = ChromeDriverManager().install()
+chromedriver_path = ChromeDriverManager().install()
 
 XPATH_MAP = {
     "policy": "/html/body/div[1]/div/div/div/div/div/div[3]/button[2]",
