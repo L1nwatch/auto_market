@@ -56,7 +56,7 @@ class LargeLanguageModel:
         prompt = {
             "background": "The following dataset contains 24 groups of numbers. Each group consists of 6 main numbers and 1 special number, all selected from the range 01 to 49.",
             "dataset": history_data,
-            "task": "1. Analyze the dataset to identify any patterns or characteristics in how the numbers are selected. 2. Summarize the patterns observed in the main numbers and the special numbers. 3. Generate 1 new number that follow the identified patterns.",
+            "task": "1. Analyze the dataset to identify any patterns or characteristics in how the numbers are selected. 2. Summarize the patterns observed in the main numbers and the special numbers. 3. Generate 1 new group of numbers that follow the identified patterns.",
             "response_format": "{'generate_nums': ['01', '02', '03, '04', '05', '06']}"
         }
         logger.info(f"Prompt: {prompt}")
