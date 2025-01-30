@@ -4,6 +4,8 @@
 """ Description
 """
 import datetime
+import re
+import os
 from utils.common import logger
 from utils.llm_predict import LargeLanguageModel
 from utils.collect_history_winner import history_year, current_year
@@ -45,9 +47,19 @@ def auto_purchase_lotto(last_lotto_date, number):
     if not MY_DB.check_buying_history_exist(last_lotto_date):
         logger.info(f"Start to buy lotto: {number}")
         # do_buying(last_lotto_date, number) # TODO: manual buying for now
-        MY_DB.save_buying_history(last_lotto_date, number) # TODO: manual buying for now
+        MY_DB.save_buying_history(last_lotto_date, number)
     else:
         logger.info(f"Already bought lotto for {last_lotto_date}")
+
+
+def format_number(number: str):
+    """
+    {'generate_nums': ['01', '02', '03, '04', '05', '06']}
+    """
+    # skip string before {'generate_nums': ['
+    number = re.findall(r"generate_nums': \['(.*)'\]", number)[0]
+    number = number.split("', '")
+    return " ".join(number)
 
 
 def predict_next_lotto(last_lotto_date):
@@ -57,11 +69,11 @@ def predict_next_lotto(last_lotto_date):
     if predict_nums:
         logger.info(f"Already have predict numbers: {predict_nums}")
         return predict_nums
-
-    llm = LargeLanguageModel(model="openai")
-    recent_win = MY_DB.get_recent_lotto_win_numbers()
-    numbers = llm.predict(recent_win, last_lotto_date)
-    return numbers
+    else:
+        llm = LargeLanguageModel(model="openai")
+        recent_win = MY_DB.get_recent_lotto_win_numbers()
+        predict_nums = llm.predict(recent_win, last_lotto_date)
+    return format_number(predict_nums)
 
 
 def check_win_status():
@@ -97,7 +109,6 @@ def fetch_history_data():
 
 def git_commit_and_push():
     logger.info("Start to git commit and push")
-    import os
     os.system("git add .")
     os.system("git commit -m 'auto commit'")
     os.system("git push")
