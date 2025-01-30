@@ -21,7 +21,7 @@ from utils.common import logger
 lotto_user = os.getenv("LOTTO_USER")
 lotto_password = os.getenv("LOTTO_PASSWORD")
 
-chromedriver_path = "/usr/bin/chromedriver"  # Chromium WebDriver path
+chromedriver_path = "/usr/lib/chromium-browser/chromedriver"  # Chromium WebDriver path
 binary_location = "/usr/bin/chromium-browser"  # Chromium browser binary
 
 XPATH_MAP = {

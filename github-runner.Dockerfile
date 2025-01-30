@@ -23,25 +23,16 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libasound2 \
     libatk-bridge2.0-0 \
-    fonts-liberation \
-    libappindicator3-1 \
     libgbm1 \
     chromium-browser \
     chromium-chromedriver \
     xvfb && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install && \
-    rm google-chrome-stable_current_amd64.deb
 
 # Install Python and pip
 RUN apt-get update && apt-get install -y python3 python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Python libraries for Selenium
-RUN pip3 install --no-cache-dir selenium webdriver-manager pyvirtualdisplay
 
 # Set up a directory for the runner
 WORKDIR /runner
@@ -67,7 +58,11 @@ RUN chmod +x /runner/entrypoint.sh
 
 # Create a non-root user and group
 RUN groupadd --gid 1001 runner && \
-    useradd --uid 1001 --gid runner --shell /bin/bash --create-home runner
+    useradd --uid 1001 --gid 1001 --shell /bin/bash --create-home runner && \
+    echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Set a password for the root user
+RUN echo "root:rootpassword" | chpasswd
 
 # Change ownership of the /runner directory to the non-root user
 RUN chown -R runner:runner /runner
