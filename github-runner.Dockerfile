@@ -43,6 +43,15 @@ RUN groupadd --gid 1001 runner && \
 # Change ownership of the /runner directory to the non-root user
 RUN chown -R runner:runner /runner
 
+# git config --global
+RUN git config --global user.email "automated-market-github-runner@gmail.com"
+RUN git config --global user.name "automated-market-github-runner"
+# set github ssh token
+RUN mkdir -p /runner/.ssh
+COPY id_rsa /runner/.ssh/id_rsa
+RUN chmod 600 /runner/.ssh/id_rsa
+RUN ssh-keyscan github.com >> /runner/.ssh/known_hosts
+
 # Switch to the non-root user
 USER runner
 

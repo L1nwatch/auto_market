@@ -130,7 +130,7 @@ def git_reset():
 
 
 def main():
-    git_reset()
+    # git_reset()
     last_lotto_date = fetch_history_data()
     check_win_status()
     number = predict_next_lotto(last_lotto_date)
