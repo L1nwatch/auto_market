@@ -6,6 +6,7 @@
 import datetime
 import re
 import os
+import json
 from utils.common import logger
 from utils.llm_predict import LargeLanguageModel
 from utils.collect_history_winner import history_year, current_year
@@ -59,8 +60,8 @@ def format_number(number: str):
     # skip string before {'generate_nums': ['
     try:
         number = re.findall(r"generate_nums[\s\S]+", number)[0]
-        number = number.split("', '")
-        return " ".join(number)
+        numbers = re.findall(r"\d+", number)
+        return "-".join(numbers)
     except Exception as e:
         logger.error(f"Extra number Error: {e}")
         return number
@@ -94,7 +95,11 @@ def check_win_status():
         check, result = MY_DB.check_lotto_result_exist(year=year, month=month, day=day, need_result=True)
         if not check:
             continue
-        MY_DB.update_win_status(each_data["last_lotto_date"], win_status="empty")  # TODO: check win status
+
+        bought_numbers = re.findall(r"\d+", each_data["bought_numbers"])
+        win_number = json.loads(result[0]["data"])["0"]
+        count = sum([1 for each_bought_number in bought_numbers if each_bought_number in win_number])
+        MY_DB.update_win_status(each_data["last_lotto_date"], win_status=f"match {count} number, win number: {win_number}")
 
 
 def fetch_history_data():

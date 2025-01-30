@@ -63,6 +63,7 @@ class MyLottoDB:
             sql += f" AND day = {day}"
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
+        result = self._format_result(result)
         if need_result:
             return len(result) > 0, result
         else:
@@ -152,13 +153,11 @@ class MyLottoDB:
         self.cursor.execute(sql)
         raw_data = self.cursor.fetchall()
         raw_data = self._format_result(raw_data)
-        for data in raw_data:
-            if data["year"] == int(year) and data["month"] == int(month) and data["day"] == int(day):
-                index = raw_data.index(data)
-                if 0 < index - 1 < len(raw_data):
-                    return raw_data[index - 1]
-                else:
-                    return None
+        raw_data = raw_data[0]
+        if raw_data["year"] == int(year) and raw_data["month"] == int(month) and raw_data["day"] == int(day):
+            return None
+        else:
+            return raw_data
 
 
 if __name__ == "__main__":
