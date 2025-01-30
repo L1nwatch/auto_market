@@ -21,7 +21,8 @@ from utils.common import logger
 lotto_user = os.getenv("LOTTO_USER")
 lotto_password = os.getenv("LOTTO_PASSWORD")
 
-chromedriver_path = ChromeDriverManager().install()
+chromedriver_path = "/usr/bin/chromedriver"  # Chromium WebDriver path
+binary_location = "/usr/bin/chromium-browser"  # Chromium browser binary
 
 XPATH_MAP = {
     "policy": "/html/body/div[1]/div/div/div/div/div/div[3]/button[2]",
@@ -82,7 +83,7 @@ def do_buying(number):
     :param number: str, like "01,02,03,04,05,06"
     :return:
     """
-    global lotto_user, lotto_password, XPATH_MAP, chromedriver_path
+    global lotto_user, lotto_password, XPATH_MAP, chromedriver_path, binary_location
     logger.info(f"Start to buy lotto: {number}")
 
     # Start a virtual display
@@ -94,6 +95,7 @@ def do_buying(number):
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.binary_location = binary_location  # Use Chromium binary
 
     # Initialize WebDriver
     driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)

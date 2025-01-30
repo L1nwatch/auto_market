@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     libatk-bridge2.0-0 \
     libgbm1 \
+    chromium-browser \
+    chromium-chromedriver \
     xvfb && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
