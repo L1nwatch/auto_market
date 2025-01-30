@@ -11,13 +11,14 @@ from utils.common import logger
 from utils.llm_predict import LargeLanguageModel
 from utils.collect_history_winner import history_year, current_year
 from utils.custom_db import MyLottoDB
+from utils.purchase_lotto_tickets import do_buying
 
 __author__ = '__L1n__w@tch'
 
 MY_DB = MyLottoDB()
 
 
-def update_html_with_win_status_and_predict_number(last_lotto_date):
+def update_html_with_win_status_and_predict_number():
     logger.info("Start to update html with win status and predict number")
 
     all_buying_history = MY_DB.get_all_buying_history()
@@ -47,7 +48,7 @@ def auto_purchase_lotto(last_lotto_date, number):
     logger.info(f"Start to auto purchase lotto: {number}")
     if not MY_DB.check_buying_history_exist(last_lotto_date):
         logger.info(f"Start to buy lotto")
-        # do_buying(last_lotto_date, number) # TODO: manual buying for now
+        do_buying(number)
         MY_DB.save_buying_history(last_lotto_date, number)
     else:
         logger.info(f"Already bought lotto for {last_lotto_date}")
@@ -124,18 +125,12 @@ def git_commit_and_push():
     os.system("git push")
 
 
-def git_reset():
-    logger.info("Start to git reset")
-    os.system("git reset --hard HEAD^")
-
-
 def main():
-    # git_reset()
     last_lotto_date = fetch_history_data()
     check_win_status()
     number = predict_next_lotto(last_lotto_date)
     auto_purchase_lotto(last_lotto_date, number)
-    update_html_with_win_status_and_predict_number(last_lotto_date)
+    update_html_with_win_status_and_predict_number()
     git_commit_and_push()
 
 
