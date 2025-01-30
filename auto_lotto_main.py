@@ -57,9 +57,13 @@ def format_number(number: str):
     {'generate_nums': ['01', '02', '03, '04', '05', '06']}
     """
     # skip string before {'generate_nums': ['
-    number = re.findall(r"generate_nums': \['(.*)'\]", number)[0]
-    number = number.split("', '")
-    return " ".join(number)
+    try:
+        number = re.findall(r"generate_nums[\s\S]+", number)[0]
+        number = number.split("', '")
+        return " ".join(number)
+    except Exception as e:
+        logger.error(f"Extra number Error: {e}")
+        return number
 
 
 def predict_next_lotto(last_lotto_date):
@@ -68,7 +72,6 @@ def predict_next_lotto(last_lotto_date):
     predict_nums = MY_DB.get_predict_nums(last_lotto_date)
     if predict_nums:
         logger.info(f"Already have predict numbers: {predict_nums}")
-        return predict_nums
     else:
         llm = LargeLanguageModel(model="openai")
         recent_win = MY_DB.get_recent_lotto_win_numbers()
