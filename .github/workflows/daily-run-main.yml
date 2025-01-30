@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f lib/requirements.txt ]; then pip install -r lib/requirements.txt; fi
 
       - name: Run auto_lotto_main.py
         run: python auto_lotto_main.py
