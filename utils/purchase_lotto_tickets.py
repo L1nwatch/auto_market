@@ -40,7 +40,9 @@ XPATH_MAP = {
     "order": "/html/body/div[2]/div[2]/div/section[3]/form/aside/section[6]/button",
     "upcoming_draw": "/html/body/div[2]/div[2]/div/section[3]/a[2]",
     "see_my_ticket": "/html/body/div[2]/div[2]/div/section[3]/section[3]/div[2]/a/span",
-    "ticket_number": "/html/body/div[2]/div[2]/div/section[3]/section[1]/div/div[3]/div/div/div[6]/div[2]/div/span"
+    "ticket_number": "/html/body/div[2]/div[2]/div/section[3]/section[1]/div/div[3]/div/div/div[6]/div[2]/div/span",
+    "digit_code": "/html/body/main/section/div/div/div/div[1]/div/form/div[1]/div/div/div/input",
+    "digit_code_confirm": "/html/body/main/section/div/div/div/div[1]/div/form/div[2]/button"
 }
 
 for i in range(1, 50):
@@ -109,6 +111,10 @@ def do_buying(number):
         wait_and_click(driver, XPATH_MAP["next"], "next")
         wait_and_input(driver, XPATH_MAP["password"], lotto_password, "password")
         wait_and_click(driver, XPATH_MAP["submit_login"], "submit_login")
+        # time.sleep(10)
+        # security_code = input("security_code: ")
+        # wait_and_input(driver, XPATH_MAP["digit_code"], security_code, "security_code")
+        # wait_and_click(driver, XPATH_MAP["digit_code_confirm"], "digit_code_confirm")
         wait_and_click(driver, XPATH_MAP["login_option"], "login_option")
         driver.get("https://loteries.espacejeux.com/en/lotteries/lotto-6-49")
         wait_and_click(driver, XPATH_MAP["buy_ticket"], "buy_ticket")
@@ -128,7 +134,9 @@ def do_buying(number):
         driver.save_screenshot("ticket.png")
     except Exception as e:
         logger.error(traceback.format_exc())
-        driver.save_screenshot("temp.png")
+        driver.save_screenshot("chrome_debug.png")
+        with open("chrome_debug_page_source.html", "w", encoding="utf8") as file:
+            file.write(driver.page_source)
 
     # Close everything
     driver.quit()
