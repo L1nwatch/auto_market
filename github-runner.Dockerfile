@@ -24,15 +24,40 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     libatk-bridge2.0-0 \
     libgbm1 \
-    chromium-browser \
-    chromium-chromedriver \
     xvfb && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
 
 # Install Python and pip
 RUN apt-get update && apt-get install -y python3 python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set higher priority for the Chromium PPA
+RUN sudo tee /etc/apt/preferences.d/chromium-ppa.pref <<EOF
+Package: *
+Pin: release o=LP-PPA-saiarcot895-chromium-beta
+Pin-Priority: 1001
+EOF
+
+# Add the Chromium PPA repository
+RUN echo "deb http://ppa.launchpadcontent.net/saiarcot895/chromium-beta/ubuntu jammy main" | sudo tee /etc/apt/sources.list.d/chromium-beta.list
+
+# Add the Chromium PPA GPG key
+RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 4B2F369E32D934F066ACB0C3F6C3EADDA7D08424
+
+# Update package lists
+RUN sudo apt update
+
+# Install Chromium browser
+RUN sudo apt install -y chromium-browser
+
+# Verify Chromium installation
+RUN /usr/bin/chromium-browser --version
+
+# Install ChromeDriver
+RUN sudo apt install -y chromium-chromedriver
+
+# Verify ChromeDriver installation
+RUN /usr/lib/chromium-browser/chromedriver --version
 
 # Set up a directory for the runner
 WORKDIR /runner
