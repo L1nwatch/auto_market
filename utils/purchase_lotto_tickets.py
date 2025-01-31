@@ -14,7 +14,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 from pyvirtualdisplay import Display
 from utils.common import logger
 
@@ -115,7 +114,7 @@ def do_buying(number):
         # security_code = input("security_code: ")
         # wait_and_input(driver, XPATH_MAP["digit_code"], security_code, "security_code")
         # wait_and_click(driver, XPATH_MAP["digit_code_confirm"], "digit_code_confirm")
-        wait_and_click(driver, XPATH_MAP["login_option"], "login_option")
+        wait_and_click(driver, XPATH_MAP["login_option"], "login_option", error_ignore=True)
         driver.get("https://loteries.espacejeux.com/en/lotteries/lotto-6-49")
         wait_and_click(driver, XPATH_MAP["buy_ticket"], "buy_ticket")
         wait_and_click(driver, XPATH_MAP["choose_number"], "choose_number")
