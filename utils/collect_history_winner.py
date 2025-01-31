@@ -28,7 +28,7 @@ def history_year(end_year):
 
     for year in tqdm(range(1982, end_year + 1)):
         if is_result_exist(year):
-            logger.info(f"{year} data already exist")
+            # logger.info(f"{year} data already exist")
             continue
         logger.info(f"Start to fetch {year} data")
         base_url = f"https://loteries.lotoquebec.com/en/lotteries/lotto-6-49?annee={year}&widget=resultats-anterieurs&noPro" \
