@@ -68,7 +68,7 @@ def wait_and_input(driver, xpath, input_text, button_name=""):
     )
     logger.info(f"[{button_name}] input box found!")
     input_box.send_keys(input_text)
-    logger.info(f"[{button_name}] input box input: {input_text}!")
+    logger.info(f"[{button_name}] input box input text!")
 
 
 def wait_and_read(driver, xpath, button_name=""):
