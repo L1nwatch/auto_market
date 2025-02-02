@@ -3,8 +3,8 @@ name: Run auto_lotto_main.py Daily
 # Define triggers: scheduled and manual
 on:
   schedule:
-    # Runs daily at 00:00 UTC
-    - cron: '0 0 * * *'
+    # Runs daily at 9:00 AM Montreal time (14:00 UTC)
+    - cron: '0 14 * * *'
   workflow_dispatch:
   push:
     branches:
