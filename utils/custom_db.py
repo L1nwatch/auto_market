@@ -71,7 +71,7 @@ class MyLottoDB:
 
     def get_recent_lotto_win_numbers(self):
         results = dict()
-        sql = f"SELECT * FROM {self.table_name['history_lotto']} ORDER BY year DESC, month DESC, day DESC LIMIT 24"
+        sql = f"SELECT * FROM {self.table_name['history_lotto']} ORDER BY year DESC, month DESC, day DESC LIMIT 48"
         self.cursor.execute(sql)
         raw_data = self.cursor.fetchall()
         for data in raw_data:
