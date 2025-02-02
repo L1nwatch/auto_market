@@ -46,7 +46,7 @@ XPATH_MAP = {
 
 for i in range(1, 50):
     XPATH_MAP[
-        str(i)] = f"/html/body/div[2]/div[2]/div/section[3]/form/section[11]/div/div/div/div[2]/div[3]/span/span[{i}]"
+        f"{i:02}"] = f"/html/body/div[2]/div[2]/div/section[3]/form/section[11]/div/div/div/div[2]/div[3]/span/span[{i}]"
 
 
 def wait_and_click(driver, xpath, button_name="", error_ignore=False):
