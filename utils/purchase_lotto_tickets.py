@@ -122,8 +122,8 @@ def do_buying(number):
             wait_and_click(driver, XPATH_MAP[each_number], each_number)
         wait_and_click(driver, XPATH_MAP["finish_choose_number"], "finish_choose_number")
         wait_and_click(driver, XPATH_MAP["no_extra"], "no_extra")
-        # wait_and_click(driver, XPATH_MAP["buying_confirm"], "buying_confirm") #TODO: wait for next week
-        # wait_and_click(driver, XPATH_MAP["order"], "order") #TODO: wait for next week
+        wait_and_click(driver, XPATH_MAP["buying_confirm"], "buying_confirm")
+        wait_and_click(driver, XPATH_MAP["order"], "order")
         driver.get("https://loteries.espacejeux.com/lel/en/my-purchases")
         wait_and_click(driver, XPATH_MAP["upcoming_draw"], "upcoming_draw")
         time.sleep(10)  # sleep 10s
