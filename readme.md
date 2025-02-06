@@ -9,8 +9,8 @@
 This project uses LLMs to generate lottery numbers, automatically purchase tickets, and verify winning statuses. 
 
 The purchased tickets and their results are displayed on GitHub Pages.
+[https://l1nwatch.github.io/auto_market/](https://l1nwatch.github.io/auto_market/)
 
-[l1nwatch.github.io/auto_market/](l1nwatch.github.io/auto_market/)
 
 ### Design Overview
 
