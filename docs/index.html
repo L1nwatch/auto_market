@@ -19,26 +19,43 @@
         }
         main {
             padding: 20px;
+            overflow-x: auto; /* Enable horizontal scrolling if needed */
         }
         table {
             width: 100%;
+            max-width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             background: white;
+            display: block;
+            overflow-x: auto;
         }
         th, td {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: center;
+            word-break: break-word;
         }
         th {
             background-color: #333;
             color: white;
         }
         th:nth-child(4), td:nth-child(4) {
-            width: 70%; /* Limit the width of the column */
-            word-wrap: break-word; /* Break long words if necessary */
-            white-space: pre-wrap; /* Preserve spaces and wrap content */
+            word-break: break-word;
+        }
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            table {
+                font-size: 12px;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            th, td {
+                padding: 5px;
+            }
         }
     </style>
 </head>
@@ -48,17 +65,18 @@
 </header>
 <main>
     <h2>Results</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Last Lotto Date</th>
-            <th>Bought Numbers</th>
-            <th>Win status</th>
-            <th>LLM Predict Results</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr><td>2025-02-12</td><td>02-10-21-27-36-41</td><td>empty</td><td>{
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+            <tr>
+                <th>Last Lotto Date</th>
+                <th>Bought Numbers</th>
+                <th>Win Status</th>
+                <th>LLM Predict Results</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr><td>2025-02-12</td><td>02-10-21-27-36-41</td><td>empty</td><td>{
   "generate_nums": [
     "02",
     "10",
@@ -109,8 +127,9 @@
     ["06", "10", "13", "25", "30", "49"]
   ]
 }</td></tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </main>
 </body>
 </html>
