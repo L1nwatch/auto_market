@@ -65,15 +65,31 @@ flowchart TD
 
 ### How to run daily
 
-1. create a GitHub actions self-hosted runner
+The execution schedule is defined in
+[`.github/workflows/daily-run-main.yml`](.github/workflows/daily-run-main.yml).
+This GitHub Actions workflow runs `auto_lotto_main.py` every day at **14:00 UTC**
+(9:00 AM Montreal time).
+
+1. **Create a self-hosted runner**
+
+   Build and start the runner container with your credentials:
 
 ```shell
-docker build -f github-runner.Dockerfile --build-arg OPENAI_API_KEY="$OPENAI_API_KEY" --build-arg RUNNER_TOKEN="$RUNNER_TOKEN" --build-arg LOTTO_USER="$LOTTO_USER" --build-arg LOTTO_PASSWORD="$LOTTO_PASSWORD" -t auto-lotto-github-runner .
+docker build -f github-runner.Dockerfile \
+  --build-arg OPENAI_API_KEY="$OPENAI_API_KEY" \
+  --build-arg RUNNER_TOKEN="$RUNNER_TOKEN" \
+  --build-arg LOTTO_USER="$LOTTO_USER" \
+  --build-arg LOTTO_PASSWORD="$LOTTO_PASSWORD" \
+  -t auto-lotto-github-runner .
 
 docker run -d auto-lotto-github-runner
 ```
 
-2. run the main script: `auto_lotto_main.py`
+2. **Workflow execution**
+
+   Once the runner is online, GitHub automatically triggers the workflow daily.
+   You can also manually start it from the Actions tab using the
+   `workflow_dispatch` option.
 
 ## Project2: Auto Stock Trading
 
