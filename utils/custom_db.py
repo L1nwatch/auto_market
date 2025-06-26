@@ -39,7 +39,8 @@ class MyLottoDB:
                 tid INTEGER PRIMARY KEY,
                 last_lotto_date TEXT,
                 prompt TEXT,
-                results TEXT
+                results TEXT,
+                predict_number_sources TEXT DEFAULT 'LLM'
             )
             """,
             f"""
@@ -47,13 +48,31 @@ class MyLottoDB:
                 tid INTEGER PRIMARY KEY,
                 last_lotto_date TEXT,
                 bought_numbers TEXT,
-                win_status TEXT
+                win_status TEXT,
+                predict_number_sources TEXT DEFAULT 'LLM'
             )
             """
         ]
         for sql in sqls:
             self.cursor.execute(sql)
+        self._add_column_if_not_exists(
+            self.table_name['llm_lotto_predict'],
+            'predict_number_sources',
+            "TEXT DEFAULT 'LLM'"
+        )
+        self._add_column_if_not_exists(
+            self.table_name['buying_history'],
+            'predict_number_sources',
+            "TEXT DEFAULT 'LLM'"
+        )
         self.conn.commit()
+
+    def _add_column_if_not_exists(self, table, column, column_def):
+        self.cursor.execute(f"PRAGMA table_info({table})")
+        columns = [info[1] for info in self.cursor.fetchall()]
+        if column not in columns:
+            self.cursor.execute(
+                f"ALTER TABLE {table} ADD COLUMN {column} {column_def}")
 
     def check_lotto_result_exist(self, *, year, month, day, need_result=False):
         sql = f"SELECT * FROM {self.table_name['history_lotto']} WHERE year = {year}"
@@ -103,10 +122,10 @@ class MyLottoDB:
         result = self._format_result(raw_data)
         return result[0]["results"]
 
-    def save_predict_nums(self, last_lotto_date, prompt, response):
+    def save_predict_nums(self, last_lotto_date, prompt, response, source="LLM"):
         prompt = json.dumps(prompt)
-        sql = f"INSERT INTO {self.table_name['llm_lotto_predict']} (last_lotto_date, prompt, results) VALUES (?, ?, ?)"
-        self.cursor.execute(sql, (last_lotto_date, prompt, response))
+        sql = f"INSERT INTO {self.table_name['llm_lotto_predict']} (last_lotto_date, prompt, results, predict_number_sources) VALUES (?, ?, ?, ?)"
+        self.cursor.execute(sql, (last_lotto_date, prompt, response, source))
         self.conn.commit()
 
     def get_last_lotto_date(self):
@@ -142,9 +161,9 @@ class MyLottoDB:
         raw_data = self.cursor.fetchall()
         return len(raw_data) > 0
 
-    def save_buying_history(self, last_lotto_date, number):
-        sql = f"INSERT INTO {self.table_name['buying_history']} (last_lotto_date, bought_numbers, win_status) VALUES (?, ?, ?)"
-        self.cursor.execute(sql, (last_lotto_date, number, "empty"))
+    def save_buying_history(self, last_lotto_date, number, source="LLM"):
+        sql = f"INSERT INTO {self.table_name['buying_history']} (last_lotto_date, bought_numbers, win_status, predict_number_sources) VALUES (?, ?, ?, ?)"
+        self.cursor.execute(sql, (last_lotto_date, number, "empty", source))
         self.conn.commit()
 
     def get_next_date(self, date):
