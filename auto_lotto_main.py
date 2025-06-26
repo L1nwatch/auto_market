@@ -22,11 +22,27 @@ def update_html_with_win_status_and_predict_number():
     logger.info("Start to update html with win status and predict number")
 
     all_buying_history = MY_DB.get_all_buying_history()
+    total_tickets = len(all_buying_history)
+    total_win_numbers = 0
+    matched_distribution = {i: 0 for i in range(7)}
     for each_data in all_buying_history:
         predict_nums = MY_DB.get_predict_nums(each_data["last_lotto_date"])
         each_data["predict_nums"] = predict_nums
+        matched = re.search(r"match (\d+) number", each_data["win_status"])
+        if matched:
+            count = int(matched.group(1))
+            total_win_numbers += count
+            if count in matched_distribution:
+                matched_distribution[count] += 1
 
-    # format to html
+    # build distribution rows
+    matched_distribution_rows = []
+    for i in range(7):
+        matched_distribution_rows.append(
+            f"<tr><td>{i}</td><td>{matched_distribution[i]}</td></tr>"
+        )
+
+    # format buying history
     format_buying_history = []
     for each_data in all_buying_history:
         one_row = list()
@@ -40,6 +56,9 @@ def update_html_with_win_status_and_predict_number():
     with open("docs/index_template.html", "r") as f:
         html = f.read()
         html = html.replace("{{ need_to_be_replaced }}", "\n".join(format_buying_history))
+        html = html.replace("{{ total_tickets }}", str(total_tickets))
+        html = html.replace("{{ total_win_numbers }}", str(total_win_numbers))
+        html = html.replace("{{ matched_distribution_rows }}", "\n".join(matched_distribution_rows))
     with open("docs/index.html", "w") as f:
         f.write(html)
 
