@@ -70,7 +70,7 @@
     {{ matched_distribution_tables }}
     <h2>Results</h2>
     <div style="overflow-x: auto;">
-        <table>
+        <table id="resultsTable">
             <thead>
             <tr>
                 <th>Last Lotto Date</th>
@@ -85,6 +85,43 @@
             </tbody>
         </table>
     </div>
+    <h2>Hit Rate Over Time</h2>
+    <canvas id="hitRateChart"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.querySelectorAll('#resultsTable tbody tr');
+            const labels = [];
+            const data = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const date = cells[0].textContent.trim();
+                const winText = cells[2].textContent;
+                const match = winText.match(/match\s+(\d+)/);
+                const count = match ? parseInt(match[1]) : 0;
+                labels.unshift(date);
+                data.unshift(count / 6);
+            });
+            const ctx = document.getElementById('hitRateChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Hit Rate',
+                        data: data,
+                        borderColor: 'blue',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {beginAtZero: true, max: 1}
+                    }
+                }
+            });
+        });
+    </script>
 </main>
 </body>
 </html>
