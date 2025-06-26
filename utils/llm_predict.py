@@ -66,7 +66,7 @@ class LargeLanguageModel:
             response = self.deepseek_request(prompt)
         else:
             response = self.openai_request(prompt)
-        self.db.save_predict_nums(last_lotto_date, prompt, response)
+        self.db.save_predict_nums(last_lotto_date, prompt, response, source="LLM")
         return response
 
 
