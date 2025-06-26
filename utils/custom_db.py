@@ -100,6 +100,28 @@ class MyLottoDB:
             results[f"{year}-{month:02}-{day:02}"] = value
         return results
 
+    def get_lotto_numbers_since(self, start_date):
+        """Return all lotto numbers from the given date (inclusive)."""
+        start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
+        sql = (
+            f"SELECT data FROM {self.table_name['history_lotto']} "
+            f"WHERE (year * 10000 + month * 100 + day) >= ? "
+            f"ORDER BY year ASC, month ASC, day ASC"
+        )
+        self.cursor.execute(sql, (start_val,))
+        rows = [r[0] for r in self.cursor.fetchall()]
+        results = []
+        for value in rows:
+            try:
+                data = json.loads(value)
+            except Exception:
+                continue
+            numbers = re.findall(r"\d{2}", json.dumps(data))
+            numbers = [int(n) for n in numbers[:7]]
+            if len(numbers) == 7:
+                results.append(numbers)
+        return results
+
     def save_results(self, data, expected_year):
         for date, value in data.items():
             year, month, day = date.split("-")
