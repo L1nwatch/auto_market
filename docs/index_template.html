@@ -65,19 +65,9 @@
 </header>
 <main>
     <h2>Summary</h2>
-    <table>
-        <tr><th>Total Tickets Bought</th><td>{{ total_tickets }}</td></tr>
-        <tr><th>Total Win Numbers</th><td>{{ total_win_numbers }}</td></tr>
-    </table>
+    {{ summary_tables }}
     <h3>Matched Count Distribution</h3>
-    <table>
-        <thead>
-        <tr><th>Matched Numbers</th><th>Ticket Count</th></tr>
-        </thead>
-        <tbody>
-        {{ matched_distribution_rows }}
-        </tbody>
-    </table>
+    {{ matched_distribution_tables }}
     <h2>Results</h2>
     <div style="overflow-x: auto;">
         <table>
