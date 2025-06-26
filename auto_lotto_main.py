@@ -52,9 +52,14 @@ def update_html_with_win_status_and_predict_number():
     matched_distribution_tables = []
     for source, data in group_summary.items():
         summary_tables.append(f"<h3>{source}</h3>")
+        avg_hit_rate = 0
+        if data["total_tickets"] > 0:
+            avg_hit_rate = data["total_win_numbers"] / (data["total_tickets"] * 6)
+
         summary_tables.append(
             f"<table><tr><th>Total Tickets Bought</th><td>{data['total_tickets']}</td></tr>"
-            f"<tr><th>Total Win Numbers</th><td>{data['total_win_numbers']}</td></tr></table>"
+            f"<tr><th>Total Win Numbers</th><td>{data['total_win_numbers']}</td></tr>"
+            f"<tr><th>Average Hit Rate</th><td>{avg_hit_rate:.2%}</td></tr></table>"
         )
 
         matched_distribution_tables.append(f"<h3>{source}</h3>")
