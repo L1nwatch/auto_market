@@ -22,27 +22,47 @@ def update_html_with_win_status_and_predict_number():
     logger.info("Start to update html with win status and predict number")
 
     all_buying_history = MY_DB.get_all_buying_history()
-    total_tickets = len(all_buying_history)
-    total_win_numbers = 0
-    matched_distribution = {i: 0 for i in range(7)}
+    group_summary = {}
     for each_data in all_buying_history:
         predict_nums = MY_DB.get_predict_nums(each_data["last_lotto_date"])
         each_data["predict_nums"] = predict_nums
         # ensure predict_number_sources always has a value
         if not each_data.get("predict_number_sources"):
             each_data["predict_number_sources"] = "LLM"
+        source = each_data["predict_number_sources"]
+        if source not in group_summary:
+            group_summary[source] = {
+                "total_tickets": 0,
+                "total_win_numbers": 0,
+                "distribution": {i: 0 for i in range(7)}
+            }
+
+        group_summary[source]["total_tickets"] += 1
+
         matched = re.search(r"match (\d+) number", each_data["win_status"])
         if matched:
             count = int(matched.group(1))
-            total_win_numbers += count
-            if count in matched_distribution:
-                matched_distribution[count] += 1
+            group_summary[source]["total_win_numbers"] += count
+            if count in group_summary[source]["distribution"]:
+                group_summary[source]["distribution"][count] += 1
 
-    # build distribution rows
-    matched_distribution_rows = []
-    for i in range(7):
-        matched_distribution_rows.append(
-            f"<tr><td>{i}</td><td>{matched_distribution[i]}</td></tr>"
+    # build summary and distribution tables
+    summary_tables = []
+    matched_distribution_tables = []
+    for source, data in group_summary.items():
+        summary_tables.append(f"<h3>{source}</h3>")
+        summary_tables.append(
+            f"<table><tr><th>Total Tickets Bought</th><td>{data['total_tickets']}</td></tr>"
+            f"<tr><th>Total Win Numbers</th><td>{data['total_win_numbers']}</td></tr></table>"
+        )
+
+        matched_distribution_tables.append(f"<h3>{source}</h3>")
+        rows = []
+        for i in range(7):
+            rows.append(f"<tr><td>{i}</td><td>{data['distribution'][i]}</td></tr>")
+        matched_distribution_tables.append(
+            "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th></tr></thead><tbody>"
+            + "".join(rows) + "</tbody></table>"
         )
 
     # format buying history
@@ -60,9 +80,8 @@ def update_html_with_win_status_and_predict_number():
     with open("docs/index_template.html", "r") as f:
         html = f.read()
         html = html.replace("{{ need_to_be_replaced }}", "\n".join(format_buying_history))
-        html = html.replace("{{ total_tickets }}", str(total_tickets))
-        html = html.replace("{{ total_win_numbers }}", str(total_win_numbers))
-        html = html.replace("{{ matched_distribution_rows }}", "\n".join(matched_distribution_rows))
+        html = html.replace("{{ summary_tables }}", "\n".join(summary_tables))
+        html = html.replace("{{ matched_distribution_tables }}", "\n".join(matched_distribution_tables))
     with open("docs/index.html", "w") as f:
         f.write(html)
 
