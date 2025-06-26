@@ -93,4 +93,9 @@ docker run -d auto-lotto-github-runner
 
 ## Project2: Auto Stock Trading
 
-[details](./auto_stock/README.md)
+An experimental bot that interacts with the Tonghuashun trading system to buy
+recently dipped stocks and automatically place sell orders for profit or loss.
+The scripts are paused but remain available for reference.
+
+- [Chinese documentation](./auto_stock/README.md)
+- [English documentation](./auto_stock/README_en.md)
