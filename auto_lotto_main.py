@@ -10,6 +10,7 @@ import json
 from utils.common import logger
 from utils.llm_predict import LargeLanguageModel
 from utils.random_predict import RandomLottoNumberGenerator
+from utils.frequency_predict import FrequencyWeightedPredictor
 from utils.collect_history_winner import history_year, current_year
 from utils.custom_db import MyLottoDB
 from utils.purchase_lotto_tickets import do_buying
@@ -140,6 +141,9 @@ def predict_next_lotto(last_lotto_date, source="LLM"):
 
     if source.upper() == "RANDOM":
         generator = RandomLottoNumberGenerator()
+        return generator.predict(last_lotto_date)
+    if source.upper() == "FREQ":
+        generator = FrequencyWeightedPredictor()
         return generator.predict(last_lotto_date)
 
     llm = LargeLanguageModel(model="openai")

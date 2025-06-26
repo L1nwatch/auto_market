@@ -21,7 +21,11 @@ Key directories and files:
 
 ## Project1: Auto Lotto
 
-This project uses LLMs to generate lottery numbers, automatically purchase tickets, and verify winning statuses. 
+This project uses various strategies to generate lottery numbers, automatically purchase tickets, and verify winning statuses.
+The available predictors include:
+1. **LLM** - a language model suggests numbers based on recent draws.
+2. **Random** - generates purely random combinations.
+3. **Frequency-weighted** - analyzes the last two years of draws and selects the most common numbers.
 
 The purchased tickets and their results are displayed on GitHub Pages.
 [https://l1nwatch.github.io/auto_market/](https://l1nwatch.github.io/auto_market/)
