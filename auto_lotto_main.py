@@ -28,6 +28,9 @@ def update_html_with_win_status_and_predict_number():
     for each_data in all_buying_history:
         predict_nums = MY_DB.get_predict_nums(each_data["last_lotto_date"])
         each_data["predict_nums"] = predict_nums
+        # ensure predict_number_sources always has a value
+        if not each_data.get("predict_number_sources"):
+            each_data["predict_number_sources"] = "LLM"
         matched = re.search(r"match (\d+) number", each_data["win_status"])
         if matched:
             count = int(matched.group(1))
@@ -50,6 +53,7 @@ def update_html_with_win_status_and_predict_number():
         one_row.append(f"<td>{each_data['bought_numbers']}</td>")
         one_row.append(f"<td>{each_data['win_status']}</td>")
         one_row.append(f"<td>{each_data['predict_nums']}</td>")
+        one_row.append(f"<td>{each_data['predict_number_sources']}</td>")
         format_buying_history.append(f"<tr>{''.join(one_row)}</tr>")
 
     # update to html
