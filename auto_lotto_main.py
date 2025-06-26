@@ -9,6 +9,7 @@ import os
 import json
 from utils.common import logger
 from utils.llm_predict import LargeLanguageModel
+from utils.random_predict import RandomLottoNumberGenerator
 from utils.collect_history_winner import history_year, current_year
 from utils.custom_db import MyLottoDB
 from utils.purchase_lotto_tickets import do_buying
@@ -86,12 +87,12 @@ def update_html_with_win_status_and_predict_number():
         f.write(html)
 
 
-def auto_purchase_lotto(last_lotto_date, number):
+def auto_purchase_lotto(last_lotto_date, number, source="LLM"):
     logger.info(f"Start to auto purchase lotto: {number}")
     if not MY_DB.check_buying_history_exist(last_lotto_date):
         logger.info(f"Start to buy lotto")
         do_buying(number)
-        MY_DB.save_buying_history(last_lotto_date, number)
+        MY_DB.save_buying_history(last_lotto_date, number, source=source)
     else:
         logger.info(f"Already bought lotto for {last_lotto_date}")
 
@@ -110,17 +111,36 @@ def format_number(number: str):
         return number
 
 
-def predict_next_lotto(last_lotto_date):
+def predict_next_lotto(last_lotto_date, source="LLM"):
+    """Return predicted lotto numbers.
+
+    Parameters
+    ----------
+    last_lotto_date : str
+        Last draw date from the database.
+    source : str, optional
+        Prediction method to use. If "RANDOM", numbers are generated at random;
+        otherwise the LLM-based method is used. Default "LLM".
+    """
+
     logger.info("Start to predict next lotto")
-    # check if already have numbers
+
     predict_nums = MY_DB.get_predict_nums(last_lotto_date)
     if predict_nums:
         logger.info(f"Already have predict numbers: {predict_nums}")
-    else:
-        llm = LargeLanguageModel(model="openai")
-        recent_win = MY_DB.get_recent_lotto_win_numbers()
-        predict_nums = llm.predict(recent_win, last_lotto_date)
-        logger.info(f"Predict numbers: {predict_nums}")
+        # stored LLM results might need formatting
+        if "generate_nums" in predict_nums:
+            predict_nums = format_number(predict_nums)
+        return predict_nums
+
+    if source.upper() == "RANDOM":
+        generator = RandomLottoNumberGenerator()
+        return generator.predict(last_lotto_date)
+
+    llm = LargeLanguageModel(model="openai")
+    recent_win = MY_DB.get_recent_lotto_win_numbers()
+    predict_nums = llm.predict(recent_win, last_lotto_date)
+    logger.info(f"Predict numbers: {predict_nums}")
     return format_number(predict_nums)
 
 
@@ -170,8 +190,9 @@ def git_commit_and_push():
 def main():
     last_lotto_date = fetch_history_data()
     check_win_status()
-    number = predict_next_lotto(last_lotto_date)
-    auto_purchase_lotto(last_lotto_date, number)
+    source = "RANDOM"
+    number = predict_next_lotto(last_lotto_date, source=source)
+    auto_purchase_lotto(last_lotto_date, number, source=source)
     update_html_with_win_status_and_predict_number()
     git_commit_and_push()
 
