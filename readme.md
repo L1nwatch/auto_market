@@ -30,6 +30,9 @@ The available predictors include:
 The purchased tickets and their results are displayed on GitHub Pages.
 [https://l1nwatch.github.io/auto_market/](https://l1nwatch.github.io/auto_market/)
 
+You can also view the frequency-weighted simulation results here:
+[https://l1nwatch.github.io/auto_market/freq_simulation.html](https://l1nwatch.github.io/auto_market/freq_simulation.html)
+
 
 ### Design Overview
 
