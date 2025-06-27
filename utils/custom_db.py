@@ -169,6 +169,52 @@ class MyLottoDB:
             result.append({columns[i]: data[i] for i in range(len(columns))})
         return result
 
+    def get_history_since(self, start_date):
+        """Return draw records from ``start_date`` onward ordered by date descending."""
+        start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
+        sql = (
+            f"SELECT year, month, day, data FROM {self.table_name['history_lotto']} "
+            "WHERE (year * 10000 + month * 100 + day) >= ? "
+            "ORDER BY year DESC, month DESC, day DESC"
+        )
+        self.cursor.execute(sql, (start_val,))
+        return self.cursor.fetchall()
+
+    def get_next_record(self, date):
+        """Return the draw record immediately after ``date`` if available."""
+        year, month, day = [int(x) for x in date.split("-")]
+        current_val = year * 10000 + month * 100 + day
+        sql = (
+            f"SELECT year, month, day, data FROM {self.table_name['history_lotto']} "
+            "WHERE (year * 10000 + month * 100 + day) > ? "
+            "ORDER BY year ASC, month ASC, day ASC LIMIT 1"
+        )
+        self.cursor.execute(sql, (current_val,))
+        rows = self.cursor.fetchall()
+        return self._format_result(rows)[0] if rows else None
+
+    def get_numbers_in_range(self, start_date, end_date):
+        """Return lotto numbers between ``start_date`` and ``end_date`` (exclusive)."""
+        start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
+        end_val = end_date.year * 10000 + end_date.month * 100 + end_date.day
+        sql = (
+            f"SELECT data FROM {self.table_name['history_lotto']} "
+            "WHERE (year * 10000 + month * 100 + day) >= ? "
+            "AND (year * 10000 + month * 100 + day) < ?"
+        )
+        self.cursor.execute(sql, (start_val, end_val))
+        raw = self.cursor.fetchall()
+        results = []
+        for row in raw:
+            try:
+                data = json.loads(row[0])
+                numbers = re.findall(r"\d{2}", data.get("0", ""))
+                numbers = [int(n) for n in numbers[:7]]
+                results.append(numbers)
+            except Exception:
+                continue
+        return results
+
     def get_all_buying_history(self):
         sql = f"SELECT * FROM {self.table_name['buying_history']} ORDER BY last_lotto_date DESC"
         self.cursor.execute(sql)

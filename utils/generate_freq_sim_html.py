@@ -2,25 +2,23 @@
 # -*- coding: utf-8 -*-
 """Generate frequency-weighted simulation HTML."""
 
-import sqlite3
 import json
 import re
 import datetime
 import os
 from utils.common import root
 from utils.frequency_predict import FrequencyWeightedPredictor
+from utils.custom_db import MyLottoDB
 
 
-def top_frequencies(cur, current_date, top_n=10):
+def top_frequencies(db, current_date, top_n=10):
     """Return the ``top_n`` most frequent numbers prior to ``current_date``.
 
     The search range mirrors the predictor logic: only draws from the two
     years preceding ``current_date`` are considered.
     """
     start_date = current_date - datetime.timedelta(days=365 * 2)
-    start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
-    end_val = current_date.year * 10000 + current_date.month * 100 + current_date.day
-    past_draws = get_past_numbers(cur, start_val, end_val)
+    past_draws = db.get_numbers_in_range(start_date, current_date)
 
     freq = {i: 0 for i in range(1, 50)}
     for draw in past_draws:
@@ -45,20 +43,12 @@ def parse_numbers(data_str):
     return numbers, text
 
 
-def get_past_numbers(cur, start_val, end_val):
-    cur.execute(
-        "SELECT data FROM history_lotto WHERE (year*10000+month*100+day) >= ? AND (year*10000+month*100+day) < ?",
-        (start_val, end_val),
-    )
-    rows = [r[0] for r in cur.fetchall()]
-    numbers = []
-    for r in rows:
-        nums, _ = parse_numbers(r)
-        numbers.append(nums)
-    return numbers
+def get_past_numbers(db, start_date, end_date):
+    rows = db.get_numbers_in_range(start_date, end_date)
+    return rows
 
 
-def freq_predict(cur, predictor, current_date):
+def freq_predict(db, predictor, current_date):
     """Return predicted numbers using ``FrequencyWeightedPredictor`` logic.
 
     The predictor normally inspects the last two years of draws when
@@ -67,9 +57,7 @@ def freq_predict(cur, predictor, current_date):
     reinitialising the database connection.
     """
     start_date = current_date - datetime.timedelta(days=365 * 2)
-    start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
-    end_val = current_date.year * 10000 + current_date.month * 100 + current_date.day
-    past_draws = get_past_numbers(cur, start_val, end_val)
+    past_draws = get_past_numbers(db, start_date, current_date)
 
     if not past_draws:
         return [1, 2, 3, 4, 5, 6]
@@ -83,17 +71,9 @@ def freq_predict(cur, predictor, current_date):
 
 
 def main():
-    db_path = os.path.join(root, 'data', 'lotto.db')
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    start_val = 20250125
-    cur.execute(
-        'SELECT year, month, day, data FROM history_lotto '
-        'WHERE (year * 10000 + month * 100 + day) >= ? '
-        'ORDER BY year DESC, month DESC, day DESC',
-        (start_val,)
-    )
-    rows = cur.fetchall()
+    db = MyLottoDB()
+    start_date = datetime.date(2025, 1, 25)
+    rows = db.get_history_since(start_date)
 
     result_rows = []
     total_win_numbers = 0
@@ -105,24 +85,18 @@ def main():
 
     for year, month, day, data in rows:
         current_date = datetime.date(year, month, day)
-        predicted_nums = freq_predict(cur, predictor, current_date)
+        predicted_nums = freq_predict(db, predictor, current_date)
         predicted_str = '-'.join(f"{n:02d}" for n in predicted_nums)
-        freq_list = top_frequencies(cur, current_date)
+        freq_list = top_frequencies(db, current_date)
         freq_str = ' '.join(f"{n:02d}({c})" for n, c in freq_list)
         # ``index.html`` treats the "win number" for a ticket purchased on
         # ``current_date`` as the results from the *next* draw.  Mirror that
         # behaviour here by fetching the very next record in the database.  If
         # there is no subsequent draw yet, the status should remain ``empty``.
-        cur.execute(
-            'SELECT data FROM history_lotto '
-            'WHERE (year * 10000 + month * 100 + day) > ? '
-            'ORDER BY year ASC, month ASC, day ASC LIMIT 1',
-            (year * 10000 + month * 100 + day,)
-        )
-        next_row = cur.fetchone()
+        next_row = db.get_next_record(f"{year}-{month:02d}-{day:02d}")
         has_next = next_row is not None
         if has_next:
-            actual_nums, actual_str = parse_numbers(next_row[0])
+            actual_nums, actual_str = parse_numbers(next_row['data'])
         else:
             actual_nums, actual_str = [], ''
 
