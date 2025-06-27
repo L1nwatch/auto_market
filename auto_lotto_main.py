@@ -96,6 +96,14 @@ def update_html_with_win_status_and_predict_number():
         html = html.replace("{{ need_to_be_replaced }}", "\n".join(format_buying_history))
         html = html.replace("{{ summary_tables }}", "\n".join(summary_tables))
         html = html.replace("{{ matched_distribution_tables }}", "\n".join(matched_distribution_tables))
+        nav_links = (
+            '<a href="freq_simulation_1_year.html">1Y Freq Sim</a> | '
+            '<a href="freq_simulation_2_year.html">2Y Freq Sim</a> | '
+            '<a href="freq_simulation_3_year.html">3Y Freq Sim</a> | '
+            '<a href="freq_simulation_4_year.html">4Y Freq Sim</a> | '
+            '<a href="freq_simulation_5_year.html">5Y Freq Sim</a>'
+        )
+        html = html.replace("{{ nav_links }}", nav_links)
     with open("docs/index.html", "w") as f:
         f.write(html)
 

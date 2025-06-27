@@ -11,13 +11,12 @@ from utils.frequency_predict import FrequencyWeightedPredictor
 from utils.custom_db import MyLottoDB
 
 
-def top_frequencies(db, current_date, top_n=10):
+def top_frequencies(db, current_date, years=2, top_n=10):
     """Return the ``top_n`` most frequent numbers prior to ``current_date``.
 
-    The search range mirrors the predictor logic: only draws from the two
-    years preceding ``current_date`` are considered.
+    ``years`` specifies how many years of draws should be analysed.
     """
-    start_date = current_date - datetime.timedelta(days=365 * 2)
+    start_date = current_date - datetime.timedelta(days=365 * years)
     past_draws = db.get_numbers_in_range(start_date, current_date)
 
     freq = {i: 0 for i in range(1, 50)}
@@ -49,15 +48,14 @@ def get_past_numbers(db, start_date, end_date):
     return rows
 
 
-def freq_predict(db, predictor, current_date):
+def freq_predict(db, predictor, current_date, years=2):
     """Return predicted numbers using ``FrequencyWeightedPredictor`` logic.
 
-    The predictor normally inspects the last two years of draws when
-    calculating frequencies. Here we ensure only draws before ``current_date``
-    influence the result. ``predictor`` is reused across calls to avoid
-    reinitialising the database connection.
+    ``years`` indicates how many years of historical draws to analyse.
+    Only draws before ``current_date`` are considered. ``predictor`` is
+    reused across calls to avoid reinitialising the database connection.
     """
-    start_date = current_date - datetime.timedelta(days=365 * 2)
+    start_date = current_date - datetime.timedelta(days=365 * years)
     past_draws = get_past_numbers(db, start_date, current_date)
 
     if not past_draws:
@@ -71,11 +69,7 @@ def freq_predict(db, predictor, current_date):
     return [int(n) for n in result_str.split("-")]
 
 
-def main():
-    db = MyLottoDB()
-    start_date = datetime.date(2025, 1, 25)
-    rows = db.get_history_since(start_date)
-
+def generate_html_for_year(db, rows, years):
     result_rows = []
     total_win_numbers = 0
     distribution = {i: 0 for i in range(7)}
@@ -86,9 +80,9 @@ def main():
 
     for year, month, day, data in rows:
         current_date = datetime.date(year, month, day)
-        predicted_nums = freq_predict(db, predictor, current_date)
+        predicted_nums = freq_predict(db, predictor, current_date, years=years)
         predicted_str = '-'.join(f"{n:02d}" for n in predicted_nums)
-        freq_list = top_frequencies(db, current_date)
+        freq_list = top_frequencies(db, current_date, years=years)
         freq_str = ' '.join(f"{n:02d}({c})" for n, c in freq_list)
         # ``index.html`` treats the "win number" for a ticket purchased on
         # ``current_date`` as the results from the *next* draw.  Mirror that
@@ -122,7 +116,7 @@ def main():
     total_tickets = len(result_rows)
     avg_hit_rate = total_win_numbers / (total_tickets * 6) if total_tickets else 0
 
-    summary_html = ["<h3>FREQ</h3>"]
+    summary_html = [f"<h3>FREQ-{years}Y</h3>"]
     summary_html.append(
         f"<table><tr><th>Total Tickets Bought</th><td>{total_tickets}</td></tr>"
         f"<tr><th>Total Win Numbers</th><td>{total_win_numbers}</td></tr>"
@@ -138,7 +132,7 @@ def main():
         distribution_rows.append(
             f"<tr><td>{i}</td><td>{distribution[i]}</td><td>{hit_rate:.2%}</td></tr>"
         )
-    distribution_html = ["<h3>FREQ</h3>"]
+    distribution_html = [f"<h3>FREQ-{years}Y</h3>"]
     distribution_html.append(
         "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody>"
         + ''.join(distribution_rows) + "</tbody></table>"
@@ -147,17 +141,41 @@ def main():
     template_path = os.path.join(root, 'docs', 'index_template.html')
     with open(template_path, 'r') as f:
         html = f.read()
-    html = html.replace('Historical Lotto Results', 'Frequency Weighted Simulation')
-    html = html.replace('href="freq_simulation.html"', 'href="index.html"')
-    html = html.replace('Frequency Simulation', 'Back to Results')
+    html = html.replace('Historical Lotto Results', f'Frequency Weighted Simulation ({years}-Year)')
+    nav_links = (
+        '<a href="freq_simulation_1_year.html">1Y Freq Sim</a> | '
+        '<a href="freq_simulation_2_year.html">2Y Freq Sim</a> | '
+        '<a href="freq_simulation_3_year.html">3Y Freq Sim</a> | '
+        '<a href="freq_simulation_4_year.html">4Y Freq Sim</a> | '
+        '<a href="freq_simulation_5_year.html">5Y Freq Sim</a> | '
+        '<a href="index.html">Back to Results</a>'
+    )
+    html = html.replace('{{ nav_links }}', nav_links)
     html = html.replace('LLM Predict Results', 'Number Frequency (Top 10)')
     html = html.replace('{{ summary_tables }}', '\n'.join(summary_html))
     html = html.replace('{{ matched_distribution_tables }}', '\n'.join(distribution_html))
     html = html.replace('{{ need_to_be_replaced }}', '\n'.join(result_rows))
 
-    out_path = os.path.join(root, 'docs', 'freq_simulation.html')
+    out_name = f'freq_simulation_{years}_year.html'
+    out_path = os.path.join(root, 'docs', out_name)
     with open(out_path, 'w') as f:
         f.write(html)
+    if years == 2:
+        # maintain legacy filename expected by tests and README
+        legacy_path = os.path.join(root, 'docs', 'freq_simulation.html')
+        with open(legacy_path, 'w') as f:
+            f.write(html)
+
+    return out_path
+
+
+def main():
+    db = MyLottoDB()
+    start_date = datetime.date(2025, 1, 25)
+    rows = db.get_history_since(start_date)
+
+    for years in range(1, 6):
+        generate_html_for_year(db, rows, years)
 
 
 if __name__ == '__main__':
