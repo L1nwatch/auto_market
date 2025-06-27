@@ -77,7 +77,7 @@ def main():
     cur.execute(
         'SELECT year, month, day, data FROM history_lotto '
         'WHERE (year * 10000 + month * 100 + day) >= ? '
-        'ORDER BY year ASC, month ASC, day ASC',
+        'ORDER BY year DESC, month DESC, day DESC',
         (start_val,)
     )
     rows = cur.fetchall()
