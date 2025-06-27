@@ -37,7 +37,8 @@ You can also view the frequency-weighted simulation results here:
 [2 Years](https://l1nwatch.github.io/auto_market/freq_simulation_2_year.html) |
 [3 Years](https://l1nwatch.github.io/auto_market/freq_simulation_3_year.html) |
 [4 Years](https://l1nwatch.github.io/auto_market/freq_simulation_4_year.html) |
-[5 Years](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html)
+[5 Years](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html) |
+[All Years](https://l1nwatch.github.io/auto_market/freq_simulation_all_years.html)
 
 
 ### Design Overview
