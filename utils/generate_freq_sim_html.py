@@ -20,6 +20,7 @@ def parse_numbers(data_str):
         if isinstance(first, list):
             first = ' '.join(first[0]) if isinstance(first[0], list) else ' '.join(first)
         text = str(first)
+    text = re.sub(r"\s+", " ", text.strip())
     numbers = [int(n) for n in re.findall(r"\d+", text)[:7]]
     return numbers, text
 
@@ -38,13 +39,27 @@ def get_past_numbers(cur, start_val, end_val):
 
 
 def freq_predict(cur, predictor, current_date):
-    """Return predicted numbers for the given date using the existing predictor."""
-    start_date = current_date - datetime.timedelta(days=365 * 2)
+    """Return predicted numbers for the given date using the existing predictor.
+
+    Only draws on or after 2025-01-25 are considered when building the
+    frequency table.
+    """
+    min_start = datetime.date(2025, 1, 25)
+    start_date = max(min_start, current_date - datetime.timedelta(days=365 * 2))
     start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
     end_val = current_date.year * 10000 + current_date.month * 100 + current_date.day
     past_draws = get_past_numbers(cur, start_val, end_val)
 
-    # Temporarily override the predictor's data source
+    # When there are no prior draws in the limited range, fall back to the
+    # predictor's default behaviour (which uses a wider history window). This
+    # avoids returning the trivial sequence ``1-2-3-4-5-6`` which happens when
+    # all frequencies are zero.
+    if not past_draws:
+        result_str = predictor.predict(current_date.strftime("%Y-%m-%d"))
+        return [int(n) for n in result_str.split("-")]
+
+    # Temporarily override the predictor's data source with draws from our
+    # restricted range.
     original_get_recent = predictor._get_recent_numbers
     predictor._get_recent_numbers = lambda reference_date=None: past_draws
     result_str = predictor.predict(current_date)
@@ -58,8 +73,14 @@ def main():
     db_path = os.path.join(root, 'data', 'lotto.db')
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('SELECT year, month, day, data FROM history_lotto ORDER BY year DESC, month DESC, day DESC LIMIT 100')
-    rows = cur.fetchall()[::-1]  # reverse to chronological order
+    start_val = 20250125
+    cur.execute(
+        'SELECT year, month, day, data FROM history_lotto '
+        'WHERE (year * 10000 + month * 100 + day) >= ? '
+        'ORDER BY year ASC, month ASC, day ASC',
+        (start_val,)
+    )
+    rows = cur.fetchall()
 
     result_rows = []
     total_win_numbers = 0
