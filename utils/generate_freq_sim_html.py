@@ -93,13 +93,34 @@ def main():
         current_date = datetime.date(year, month, day)
         predicted_nums = freq_predict(cur, predictor, current_date)
         predicted_str = '-'.join(f"{n:02d}" for n in predicted_nums)
-        actual_nums, actual_str = parse_numbers(data)
+        # ``index.html`` treats the "win number" for a ticket purchased on
+        # ``current_date`` as the results from the *next* draw.  Mirror that
+        # behaviour here by fetching the very next record in the database.  If
+        # there is no subsequent draw yet, the status should remain ``empty``.
+        cur.execute(
+            'SELECT data FROM history_lotto '
+            'WHERE (year * 10000 + month * 100 + day) > ? '
+            'ORDER BY year ASC, month ASC, day ASC LIMIT 1',
+            (year * 10000 + month * 100 + day,)
+        )
+        next_row = cur.fetchone()
+        has_next = next_row is not None
+        if has_next:
+            actual_nums, actual_str = parse_numbers(next_row[0])
+        else:
+            actual_nums, actual_str = [], ''
+
         match_count = sum(1 for n in predicted_nums if n in actual_nums)
-        total_win_numbers += match_count
-        if match_count in distribution:
-            distribution[match_count] += 1
         date_str = f"{year}-{month:02d}-{day:02d}"
-        win_status = f"match {match_count} number, win number: {actual_str}"
+
+        if has_next:
+            total_win_numbers += match_count
+            if match_count in distribution:
+                distribution[match_count] += 1
+            win_status = f"match {match_count} number, win number: {actual_str}"
+        else:
+            win_status = "empty"
+
         row_html = '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>FREQ</td></tr>'.format(
             date_str, predicted_str, win_status, predicted_str
         )
