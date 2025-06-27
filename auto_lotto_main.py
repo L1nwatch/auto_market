@@ -182,7 +182,8 @@ def check_win_status():
 
         bought_numbers = re.findall(r"\d+", each_data["bought_numbers"])
         win_text = json.loads(result[0]["data"])["0"]
-        win_numbers = re.findall(r"\d+", win_text)[:6]
+        # also include the bonus number when determining matches
+        win_numbers = re.findall(r"\d+", win_text)[:7]
         count = sum(1 for n in bought_numbers if n in win_numbers)
         MY_DB.update_win_status(
             each_data["last_lotto_date"],
