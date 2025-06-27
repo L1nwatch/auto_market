@@ -39,7 +39,8 @@ def parse_numbers(data_str):
             first = ' '.join(first[0]) if isinstance(first[0], list) else ' '.join(first)
         text = str(first)
     text = re.sub(r"\s+", " ", text.strip())
-    numbers = [int(n) for n in re.findall(r"\d+", text)[:6]]
+    # include the bonus ball as well so we have seven numbers in total
+    numbers = [int(n) for n in re.findall(r"\d+", text)[:7]]
     return numbers, text
 
 
