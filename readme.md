@@ -3,7 +3,6 @@
 # Auto Market
 
 [![Run auto_lotto_main.py Daily](https://github.com/L1nwatch/auto_market/actions/workflows/daily-run-main.yml/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/daily-run-main.yml)
-
 [![pages-build-deployment](https://github.com/L1nwatch/auto_market/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/pages/pages-build-deployment)
 [![Run Tests](https://github.com/L1nwatch/auto_market/actions/workflows/run-tests.yml/badge.svg)](https://github.com/L1nwatch/auto_market/actions/workflows/run-tests.yml)
 
