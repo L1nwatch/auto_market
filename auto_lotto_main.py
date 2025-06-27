@@ -14,6 +14,7 @@ from utils.frequency_predict import FrequencyWeightedPredictor
 from utils.collect_history_winner import history_year, current_year
 from utils.custom_db import MyLottoDB
 from utils.purchase_lotto_tickets import do_buying
+from utils.generate_freq_sim_html import main as generate_freq_sim_html
 
 __author__ = '__L1n__w@tch'
 
@@ -91,6 +92,9 @@ def update_html_with_win_status_and_predict_number():
         html = html.replace("{{ matched_distribution_tables }}", "\n".join(matched_distribution_tables))
     with open("docs/index.html", "w") as f:
         f.write(html)
+
+    # also build the frequency-weighted simulation page
+    generate_freq_sim_html()
 
 
 def auto_purchase_lotto(last_lotto_date, number, source="LLM"):
