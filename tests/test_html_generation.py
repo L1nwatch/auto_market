@@ -86,6 +86,8 @@ def test_index_html_generation(html_files):
     assert cells[1] == latest_row[1]
     assert cells[2].startswith(latest_row[2].split()[0])
     assert cells[4] == latest_row[3]
+    # ensure navigation contains a link to the all-year simulation page
+    assert soup.find("a", href="freq_simulation_all_years.html") is not None
 
 
 def test_freq_simulation_html_generation(html_files):
@@ -115,7 +117,10 @@ def test_freq_simulation_all_years_html_generation(html_files):
 
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) FROM history_lotto")
+    cur.execute(
+        "SELECT COUNT(*) FROM history_lotto "
+        "WHERE (year*10000 + month*100 + day) >= 20250125"
+    )
     expected_rows = min(cur.fetchone()[0], 10)
     cur.close()
     conn.close()
