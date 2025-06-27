@@ -116,11 +116,17 @@ def main():
     )
 
     distribution_rows = []
+    resolved_tickets = sum(distribution.values())
     for i in range(7):
-        distribution_rows.append(f"<tr><td>{i}</td><td>{distribution[i]}</td></tr>")
+        hit_rate = 0
+        if resolved_tickets:
+            hit_rate = distribution[i] / resolved_tickets
+        distribution_rows.append(
+            f"<tr><td>{i}</td><td>{distribution[i]}</td><td>{hit_rate:.2%}</td></tr>"
+        )
     distribution_html = ["<h3>FREQ</h3>"]
     distribution_html.append(
-        "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th></tr></thead><tbody>"
+        "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody>"
         + ''.join(distribution_rows) + "</tbody></table>"
     )
 

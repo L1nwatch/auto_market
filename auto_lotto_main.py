@@ -65,11 +65,17 @@ def update_html_with_win_status_and_predict_number():
         )
 
         matched_distribution_tables.append(f"<h3>{source}</h3>")
+        resolved_tickets = sum(data["distribution"].values())
         rows = []
         for i in range(7):
-            rows.append(f"<tr><td>{i}</td><td>{data['distribution'][i]}</td></tr>")
+            hit_rate = 0
+            if resolved_tickets:
+                hit_rate = data["distribution"][i] / resolved_tickets
+            rows.append(
+                f"<tr><td>{i}</td><td>{data['distribution'][i]}</td><td>{hit_rate:.2%}</td></tr>"
+            )
         matched_distribution_tables.append(
-            "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th></tr></thead><tbody>"
+            "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody>"
             + "".join(rows) + "</tbody></table>"
         )
 
