@@ -39,7 +39,7 @@ def parse_numbers(data_str):
             first = ' '.join(first[0]) if isinstance(first[0], list) else ' '.join(first)
         text = str(first)
     text = re.sub(r"\s+", " ", text.strip())
-    numbers = [int(n) for n in re.findall(r"\d+", text)[:7]]
+    numbers = [int(n) for n in re.findall(r"\d+", text)[:6]]
     return numbers, text
 
 
