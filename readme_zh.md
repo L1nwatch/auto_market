@@ -26,13 +26,17 @@
 可用的预测器包括：
 1. **LLM** - 根据最近的开奖数据由语言模型给出号码建议。
 2. **随机** - 生成完全随机的组合。
-3. **按频率加权** - 分析最近两年的开奖，选择出现次数最多的号码。
+3. **按频率加权** - 根据历史开奖选择出现次数最多的号码，可模拟1-5年的历史数据。
 
 购买的彩票及其结果会展示在 GitHub Pages 上。
 [https://l1nwatch.github.io/auto_market/](https://l1nwatch.github.io/auto_market/)
 
 也可以在这里查看按频率加权的模拟结果：
-[https://l1nwatch.github.io/auto_market/freq_simulation.html](https://l1nwatch.github.io/auto_market/freq_simulation.html)
+[1年](https://l1nwatch.github.io/auto_market/freq_simulation_1_year.html) |
+[2年](https://l1nwatch.github.io/auto_market/freq_simulation_2_year.html) |
+[3年](https://l1nwatch.github.io/auto_market/freq_simulation_3_year.html) |
+[4年](https://l1nwatch.github.io/auto_market/freq_simulation_4_year.html) |
+[5年](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html)
 
 
 ### 设计概览

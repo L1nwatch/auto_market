@@ -27,13 +27,17 @@ This project uses various strategies to generate lottery numbers, automatically 
 The available predictors include:
 1. **LLM** - a language model suggests numbers based on recent draws.
 2. **Random** - generates purely random combinations.
-3. **Frequency-weighted** - analyzes the last two years of draws and selects the most common numbers.
+3. **Frequency-weighted** - analyzes historical draws to select the most common numbers. Simulations are available for 1–5 years of history.
 
 The purchased tickets and their results are displayed on GitHub Pages.
 [https://l1nwatch.github.io/auto_market/](https://l1nwatch.github.io/auto_market/)
 
 You can also view the frequency-weighted simulation results here:
-[https://l1nwatch.github.io/auto_market/freq_simulation.html](https://l1nwatch.github.io/auto_market/freq_simulation.html)
+[1 Year](https://l1nwatch.github.io/auto_market/freq_simulation_1_year.html) |
+[2 Years](https://l1nwatch.github.io/auto_market/freq_simulation_2_year.html) |
+[3 Years](https://l1nwatch.github.io/auto_market/freq_simulation_3_year.html) |
+[4 Years](https://l1nwatch.github.io/auto_market/freq_simulation_4_year.html) |
+[5 Years](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html)
 
 
 ### Design Overview
