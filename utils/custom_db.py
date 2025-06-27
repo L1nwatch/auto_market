@@ -208,8 +208,15 @@ class MyLottoDB:
         for row in raw:
             try:
                 data = json.loads(row[0])
-                numbers = re.findall(r"\d{2}", data.get("0", ""))
-                numbers = [int(n) for n in numbers[:7]]
+                if "0" in data:
+                    text = data["0"]
+                else:
+                    first = next(iter(data.values()))
+                    if isinstance(first, list):
+                        first = " ".join(first[0]) if isinstance(first[0], list) else " ".join(first)
+                    text = str(first)
+                text = re.sub(r"\s+", " ", text.strip())
+                numbers = [int(n) for n in re.findall(r"\d+", text)[:7]]
                 results.append(numbers)
             except Exception:
                 continue
