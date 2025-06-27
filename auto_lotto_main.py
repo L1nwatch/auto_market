@@ -148,7 +148,8 @@ def predict_next_lotto(last_lotto_date, source="LLM"):
         return generator.predict(last_lotto_date)
     if source.upper() == "FREQ":
         generator = FrequencyWeightedPredictor()
-        return generator.predict(last_lotto_date)
+        reference_date = datetime.datetime.strptime(last_lotto_date, "%Y-%m-%d").date()
+        return generator.predict(reference_date)
 
     llm = LargeLanguageModel(model="openai")
     recent_win = MY_DB.get_recent_lotto_win_numbers()
