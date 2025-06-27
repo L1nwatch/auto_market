@@ -104,22 +104,25 @@ class MyLottoDB:
         """Return all lotto numbers from the given date (inclusive)."""
         start_val = start_date.year * 10000 + start_date.month * 100 + start_date.day
         sql = (
-            f"SELECT data FROM {self.table_name['history_lotto']} "
-            f"WHERE (year * 10000 + month * 100 + day) >= ? "
-            f"ORDER BY year ASC, month ASC, day ASC"
+            f"SELECT * FROM {self.table_name['history_lotto']} "
+            f"ORDER BY year DESC, month DESC, day DESC LIMIT 300"
         )
-        self.cursor.execute(sql, (start_val,))
-        rows = [r[0] for r in self.cursor.fetchall()]
+        self.cursor.execute(sql)
+        raw_data = self.cursor.fetchall()
         results = []
-        for value in rows:
+        for row in raw_data:
+            year, month, day, value = row[1], row[2], row[3], row[4]
+            current_val = year * 10000 + month * 100 + day
+            if current_val < start_val:
+                break
             try:
                 data = json.loads(value)
+                numbers = re.findall(r"\d{2}", data["0"])
+                numbers = [int(n) for n in numbers[:7]]
+                if len(numbers) == 7:
+                    results.append(numbers)
             except Exception:
                 continue
-            numbers = re.findall(r"\d{2}", json.dumps(data))
-            numbers = [int(n) for n in numbers[:7]]
-            if len(numbers) == 7:
-                results.append(numbers)
         return results
 
     def save_results(self, data, expected_year):
