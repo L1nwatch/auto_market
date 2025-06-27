@@ -46,8 +46,8 @@ def freq_predict(cur, predictor, current_date):
 
     # Temporarily override the predictor's data source
     original_get_recent = predictor._get_recent_numbers
-    predictor._get_recent_numbers = lambda: past_draws
-    result_str = predictor.predict(current_date.strftime("%Y-%m-%d"))
+    predictor._get_recent_numbers = lambda reference_date=None: past_draws
+    result_str = predictor.predict(current_date)
     predictor._get_recent_numbers = original_get_recent
 
     numbers = [int(n) for n in result_str.split("-")]
