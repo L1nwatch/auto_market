@@ -7,6 +7,7 @@ import os
 import json
 import re
 import sqlite3
+import datetime
 from utils.common import root
 
 __author__ = '__L1n__w@tch'
@@ -160,6 +161,18 @@ class MyLottoDB:
         if len(raw_data) == 0:
             return None
         return f"{raw_data[0][1]}-{raw_data[0][2]:02}-{raw_data[0][3]:02}"
+
+    def get_first_lotto_date(self):
+        """Return the earliest draw date in the database."""
+        sql = (
+            f"SELECT year, month, day FROM {self.table_name['history_lotto']} "
+            "ORDER BY year ASC, month ASC, day ASC LIMIT 1"
+        )
+        self.cursor.execute(sql)
+        row = self.cursor.fetchone()
+        if not row:
+            return None
+        return datetime.date(row[0], row[1], row[2])
 
     def _format_result(self, raw_data):
         result = list()

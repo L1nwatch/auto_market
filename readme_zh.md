@@ -36,7 +36,8 @@
 [2年](https://l1nwatch.github.io/auto_market/freq_simulation_2_year.html) |
 [3年](https://l1nwatch.github.io/auto_market/freq_simulation_3_year.html) |
 [4年](https://l1nwatch.github.io/auto_market/freq_simulation_4_year.html) |
-[5年](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html)
+[5年](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html) |
+[全部年份](https://l1nwatch.github.io/auto_market/freq_simulation_all_years.html)
 
 
 ### 设计概览

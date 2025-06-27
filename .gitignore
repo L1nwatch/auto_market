@@ -1,3 +1,4 @@
 /openai_api_key.txt
 .idea
 id_rsa
+__pycache__/

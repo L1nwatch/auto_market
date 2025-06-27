@@ -39,17 +39,31 @@ def html_files(tmp_path, monkeypatch):
     importlib.reload(gen_html)
     importlib.reload(auto_lotto_main)
 
+    original_gen = gen_html.generate_html_for_year
+
+    def limited_generate_html_for_year(db, rows, years):
+        if years is None:
+            rows = rows[:10]
+        return original_gen(db, rows, years)
+
+    monkeypatch.setattr(gen_html, "generate_html_for_year", limited_generate_html_for_year)
+
     # replace global DB connection with one using the temp directory
     auto_lotto_main.MY_DB = custom_db.MyLottoDB()
 
     auto_lotto_main.update_html_with_win_status_and_predict_number()
     os.chdir(cwd)
 
-    return tmp_dir / "docs" / "index.html", tmp_dir / "docs" / "freq_simulation.html", tmp_dir / "data" / "lotto.db"
+    return (
+        tmp_dir / "docs" / "index.html",
+        tmp_dir / "docs" / "freq_simulation.html",
+        tmp_dir / "docs" / "freq_simulation_all_years.html",
+        tmp_dir / "data" / "lotto.db",
+    )
 
 
 def test_index_html_generation(html_files):
-    index_path, _, db_path = html_files
+    index_path, _, _, db_path = html_files
     assert index_path.exists(), "index.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -75,7 +89,7 @@ def test_index_html_generation(html_files):
 
 
 def test_freq_simulation_html_generation(html_files):
-    _, freq_path, db_path = html_files
+    _, freq_path, _, db_path = html_files
     assert freq_path.exists(), "freq_simulation.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -88,6 +102,25 @@ def test_freq_simulation_html_generation(html_files):
     conn.close()
 
     soup = BeautifulSoup(freq_path.read_text(), "html.parser")
+    rows = soup.select("#resultsTable tbody tr")
+
+    assert len(rows) == expected_rows
+    first_cells = [c.get_text(strip=True) for c in rows[0].find_all("td")]
+    assert first_cells[-1] == "FREQ"
+
+
+def test_freq_simulation_all_years_html_generation(html_files):
+    _, _, all_path, db_path = html_files
+    assert all_path.exists(), "freq_simulation_all_years.html should be generated"
+
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM history_lotto")
+    expected_rows = min(cur.fetchone()[0], 10)
+    cur.close()
+    conn.close()
+
+    soup = BeautifulSoup(all_path.read_text(), "html.parser")
     rows = soup.select("#resultsTable tbody tr")
 
     assert len(rows) == expected_rows
