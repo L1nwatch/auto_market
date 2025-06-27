@@ -187,11 +187,8 @@ def main():
     for years in range(1, 6):
         generate_html_for_year(db, rows, years)
 
-    # build simulation using the entire history
-    first_date = db.get_first_lotto_date()
-    if first_date:
-        all_rows = db.get_history_since(first_date)
-        generate_html_for_year(db, all_rows, None)
+    # build simulation using the same range as ``index.html``
+    generate_html_for_year(db, rows, None)
 
 
 if __name__ == '__main__':
