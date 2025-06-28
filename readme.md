@@ -24,6 +24,8 @@ Key directories and files:
 ## Project1: Auto Lotto
 
 This project predicts numbers for the Lotto 6/49 lottery, automatically purchases tickets, and verifies winning statuses.
+It is specifically built around Loto-Québec's version of Lotto 6/49: the historical draws are scraped from the Loto‑Québec
+website and tickets are bought through Loto‑Québec's online platform. Other Canadian lottery systems are not supported.
 The available predictors include:
 1. **LLM** - a language model suggests numbers based on recent draws.
 2. **Random** - generates purely random combinations.
