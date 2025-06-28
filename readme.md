@@ -11,7 +11,7 @@
 
 This repository hosts two automation projects:
 
-1. **Auto Lotto** - generates lottery numbers with language models, buys tickets, and checks results.
+1. **Auto Lotto** - predicts numbers for the Lotto 6/49 game using language models, buys tickets, and checks results.
 2. **Auto Stock Trading** - demonstrates a simple stock trading strategy and logging (currently paused).
 
 Key directories and files:
@@ -23,7 +23,7 @@ Key directories and files:
 
 ## Project1: Auto Lotto
 
-This project uses various strategies to generate lottery numbers, automatically purchase tickets, and verify winning statuses.
+This project predicts numbers for the Lotto 6/49 lottery, automatically purchases tickets, and verifies winning statuses.
 The available predictors include:
 1. **LLM** - a language model suggests numbers based on recent draws.
 2. **Random** - generates purely random combinations.
