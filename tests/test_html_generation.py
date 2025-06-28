@@ -34,19 +34,28 @@ def html_files(tmp_path, monkeypatch):
     # reload modules so they pick up the patched root
     import utils.custom_db as custom_db
     import utils.generate_freq_sim_html as gen_html
+    import utils.generate_least_freq_sim_html as gen_least_html
     import auto_lotto_main
     importlib.reload(custom_db)
     importlib.reload(gen_html)
+    importlib.reload(gen_least_html)
     importlib.reload(auto_lotto_main)
 
     original_gen = gen_html.generate_html_for_year
+    original_least_gen = gen_least_html.generate_html_for_year
 
     def limited_generate_html_for_year(db, rows, years):
         if years is None:
             rows = rows[:10]
         return original_gen(db, rows, years)
 
+    def limited_generate_least_html_for_year(db, rows, years):
+        if years is None:
+            rows = rows[:10]
+        return original_least_gen(db, rows, years)
+
     monkeypatch.setattr(gen_html, "generate_html_for_year", limited_generate_html_for_year)
+    monkeypatch.setattr(gen_least_html, "generate_html_for_year", limited_generate_least_html_for_year)
 
     # replace global DB connection with one using the temp directory
     auto_lotto_main.MY_DB = custom_db.MyLottoDB()
@@ -58,12 +67,14 @@ def html_files(tmp_path, monkeypatch):
         tmp_dir / "docs" / "index.html",
         tmp_dir / "docs" / "freq_simulation.html",
         tmp_dir / "docs" / "freq_simulation_all_years.html",
+        tmp_dir / "docs" / "least_freq_simulation.html",
+        tmp_dir / "docs" / "least_freq_simulation_all_years.html",
         tmp_dir / "data" / "lotto.db",
     )
 
 
 def test_index_html_generation(html_files):
-    index_path, _, _, db_path = html_files
+    index_path, _, _, _, _, db_path = html_files
     assert index_path.exists(), "index.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -91,7 +102,7 @@ def test_index_html_generation(html_files):
 
 
 def test_freq_simulation_html_generation(html_files):
-    _, freq_path, _, db_path = html_files
+    _, freq_path, _, _, _, db_path = html_files
     assert freq_path.exists(), "freq_simulation.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -112,7 +123,7 @@ def test_freq_simulation_html_generation(html_files):
 
 
 def test_freq_simulation_all_years_html_generation(html_files):
-    _, _, all_path, db_path = html_files
+    _, _, all_path, _, _, db_path = html_files
     assert all_path.exists(), "freq_simulation_all_years.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -131,3 +142,46 @@ def test_freq_simulation_all_years_html_generation(html_files):
     assert len(rows) == expected_rows
     first_cells = [c.get_text(strip=True) for c in rows[0].find_all("td")]
     assert first_cells[-1] == "FREQ"
+
+
+def test_least_freq_simulation_html_generation(html_files):
+    _, _, _, least_path, _, db_path = html_files
+    assert least_path.exists(), "least_freq_simulation.html should be generated"
+
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT COUNT(*) FROM history_lotto WHERE (year*10000 + month*100 + day) >= 20250125"
+    )
+    expected_rows = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+
+    soup = BeautifulSoup(least_path.read_text(), "html.parser")
+    rows = soup.select("#resultsTable tbody tr")
+
+    assert len(rows) == expected_rows
+    first_cells = [c.get_text(strip=True) for c in rows[0].find_all("td")]
+    assert first_cells[-1] == "LFREQ"
+
+
+def test_least_freq_simulation_all_years_html_generation(html_files):
+    _, _, _, _, least_all_path, db_path = html_files
+    assert least_all_path.exists(), "least_freq_simulation_all_years.html should be generated"
+
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT COUNT(*) FROM history_lotto "
+        "WHERE (year*10000 + month*100 + day) >= 20250125"
+    )
+    expected_rows = min(cur.fetchone()[0], 10)
+    cur.close()
+    conn.close()
+
+    soup = BeautifulSoup(least_all_path.read_text(), "html.parser")
+    rows = soup.select("#resultsTable tbody tr")
+
+    assert len(rows) == expected_rows
+    first_cells = [c.get_text(strip=True) for c in rows[0].find_all("td")]
+    assert first_cells[-1] == "LFREQ"
