@@ -9,7 +9,12 @@ import utils.common as common
 
 def _extract_section(html: str) -> str:
     match = re.search(r"<h2>Summary</h2>(.*?)(?:<h2>Results|</main>)", html, re.S)
-    return match.group(1).strip() if match else ""
+    if not match:
+        return ""
+    section = match.group(1).strip()
+    # remove redundant FREQ/LFREQ headings in summary blocks
+    section = re.sub(r"<h3>\s*(?:L?FREQ-[^<]*)</h3>", "", section)
+    return section
 
 
 def _extract_heading(html: str) -> str:
