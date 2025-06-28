@@ -104,6 +104,11 @@ def update_html_with_win_status_and_predict_number():
             '<a href="freq_simulation_4_year.html">4Y Freq Sim</a> | '
             '<a href="freq_simulation_5_year.html">5Y Freq Sim</a> | '
             '<a href="freq_simulation_all_years.html">All Freq Sim</a> | '
+            '<a href="least_freq_simulation_1_year.html">1Y Least Freq Sim</a> | '
+            '<a href="least_freq_simulation_2_year.html">2Y Least Freq Sim</a> | '
+            '<a href="least_freq_simulation_3_year.html">3Y Least Freq Sim</a> | '
+            '<a href="least_freq_simulation_4_year.html">4Y Least Freq Sim</a> | '
+            '<a href="least_freq_simulation_5_year.html">5Y Least Freq Sim</a> | '
             '<a href="least_freq_simulation_all_years.html">All Least Freq Sim</a>'
         )
         html = html.replace("{{ nav_links }}", nav_links)
