@@ -4,17 +4,17 @@
 
 import os
 import re
+import datetime
 import utils.common as common
+from utils.custom_db import MyLottoDB
+from utils import generate_freq_sim_html as freq_module
+from utils import generate_least_freq_sim_html as lfreq_module
+import inspect
 
 
-def _extract_section(html: str) -> str:
-    match = re.search(r"<h2>Summary</h2>(.*?)(?:<h2>Results|</main>)", html, re.S)
-    if not match:
-        return ""
-    section = match.group(1).strip()
-    # remove redundant FREQ/LFREQ headings in summary blocks
-    section = re.sub(r"<h3>\s*(?:L?FREQ-[^<]*)</h3>", "", section)
-    return section
+def _strip_labels(section: str) -> str:
+    """Remove FREQ/LFREQ labels from a summary snippet."""
+    return re.sub(r"<h3>\s*(?:L?FREQ-[^<]*)</h3>", "", section)
 
 
 def _extract_heading(html: str) -> str:
@@ -25,16 +25,28 @@ def _extract_heading(html: str) -> str:
 def main() -> str:
     docs_dir = os.path.join(common.root, "docs")
 
-    def build_sections(prefix: str) -> list[str]:
+    db = MyLottoDB()
+    start_date = datetime.date(2025, 1, 25)
+    rows = db.get_history_since(start_date)
+
+    def build_sections(generator) -> list[str]:
         sections = []
-        for years in [1, 2, 3, 4, 5, "all"]:
-            suffix = f"{years}_year" if years != "all" else "all_years"
-            path = os.path.join(docs_dir, f"{prefix}_{suffix}.html")
+        accepts_return = 'return_data' in inspect.signature(generator).parameters
+        for years in [1, 2, 3, 4, 5, None]:
+            if accepts_return:
+                path, summary, dist = generator(db, rows, years, return_data=True)
+            else:
+                path = generator(db, rows, years)
+                summary = dist = ''
             with open(path, "r") as f:
                 html = f.read()
             heading = _extract_heading(html)
-            section = _extract_section(html)
-            sections.append(f"<section>\n        <h2>{heading}</h2>\n        {section}\n    </section>")
+            content = _strip_labels(summary)
+            if dist:
+                content += "\n<h3>Matched Count Distribution</h3>\n" + _strip_labels(dist)
+            sections.append(
+                f"<section>\n        <h2>{heading}</h2>\n        {content}\n    </section>"
+            )
         return sections
 
     # Use the 2 year frequency simulation to obtain common styles
@@ -53,8 +65,8 @@ def main() -> str:
         "\n"
     )
 
-    freq_sections = build_sections("freq_simulation")
-    least_sections = build_sections("least_freq_simulation")
+    freq_sections = build_sections(freq_module.generate_html_for_year)
+    least_sections = build_sections(lfreq_module.generate_html_for_year)
 
     nav_links = (
         '<a href="freq_simulation_1_year.html">1Y Freq Sim</a> | '
@@ -72,8 +84,8 @@ def main() -> str:
         '<a href="index.html">Back to Results</a>'
     )
 
-    freq_html = '<div class="summary-sections">' + ''.join(freq_sections) + '</div>'
-    least_html = '<div class="summary-sections">' + ''.join(least_sections) + '</div>'
+    freq_html_section = '<div class="summary-sections">' + ''.join(freq_sections) + '</div>'
+    least_html_section = '<div class="summary-sections">' + ''.join(least_sections) + '</div>'
 
     html = f"""<!DOCTYPE html>
 <html lang=\"en\">
@@ -89,8 +101,8 @@ def main() -> str:
     <nav>{nav_links}</nav>
 </header>
 <main>
-    {freq_html}
-    {least_html}
+    {freq_html_section}
+    {least_html_section}
 </main>
 </body>
 </html>
