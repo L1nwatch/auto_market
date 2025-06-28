@@ -167,6 +167,7 @@ def generate_html_for_year(db, rows, years, *, return_data: bool = False):
         '<a href="least_freq_simulation_4_year.html">4Y Least Freq Sim</a> | '
         '<a href="least_freq_simulation_5_year.html">5Y Least Freq Sim</a> | '
         '<a href="least_freq_simulation_all_years.html">All Least Freq Sim</a> | '
+        '<a href="simulations_summary.html">Simulations Summary</a> | '
         '<a href="index.html">Back to Results</a>'
     )
     html = html.replace('{{ nav_links }}', nav_links)
