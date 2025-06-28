@@ -40,6 +40,7 @@ def main() -> str:
     style += (
         "\n.summary-sections{display:flex;flex-wrap:nowrap;gap:20px;overflow-x:auto;}"
         "\n.summary-sections section{flex:0 0 300px;}"
+        "\n.summary-sections table{display:table;width:100%;}"
         "\n.distribution-table{table-layout:fixed;width:100%;}"
         "\n.distribution-table th:nth-child(1), .distribution-table td:nth-child(1){width:33%;}"
         "\n.distribution-table th:nth-child(2), .distribution-table td:nth-child(2){width:33%;}"
