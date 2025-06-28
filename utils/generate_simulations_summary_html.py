@@ -37,6 +37,11 @@ def main() -> str:
         style_html = f.read()
     style_match = re.search(r"<style>(.*?)</style>", style_html, re.S)
     style = style_match.group(1) if style_match else ""
+    style += (
+        "\n.summary-sections{display:flex;flex-wrap:wrap;gap:20px;}"
+        "\n.summary-sections section{flex:1 1 300px;}"
+        "\n"
+    )
 
     freq_sections = build_sections("freq_simulation")
     least_sections = build_sections("least_freq_simulation")
@@ -57,6 +62,9 @@ def main() -> str:
         '<a href="index.html">Back to Results</a>'
     )
 
+    freq_html = '<div class="summary-sections">' + ''.join(freq_sections) + '</div>'
+    least_html = '<div class="summary-sections">' + ''.join(least_sections) + '</div>'
+
     html = f"""<!DOCTYPE html>
 <html lang=\"en\">
 <head>
@@ -71,8 +79,8 @@ def main() -> str:
     <nav>{nav_links}</nav>
 </header>
 <main>
-    {"".join(freq_sections)}
-    {"".join(least_sections)}
+    {freq_html}
+    {least_html}
 </main>
 </body>
 </html>
