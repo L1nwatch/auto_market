@@ -38,8 +38,8 @@ def main() -> str:
     style_match = re.search(r"<style>(.*?)</style>", style_html, re.S)
     style = style_match.group(1) if style_match else ""
     style += (
-        "\n.summary-sections{display:flex;flex-wrap:wrap;gap:20px;}"
-        "\n.summary-sections section{flex:1 1 300px;}"
+        "\n.summary-sections{display:flex;flex-wrap:nowrap;gap:20px;overflow-x:auto;}"
+        "\n.summary-sections section{flex:0 0 300px;}"
         "\n"
     )
 
