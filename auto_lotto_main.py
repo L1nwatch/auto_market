@@ -16,6 +16,7 @@ from utils.custom_db import MyLottoDB
 from utils.purchase_lotto_tickets import do_buying
 from utils.generate_freq_sim_html import main as generate_freq_sim_html
 from utils.generate_least_freq_sim_html import main as generate_least_freq_sim_html
+from utils.generate_simulations_summary_html import main as generate_simulations_summary_html
 
 __author__ = '__L1n__w@tch'
 
@@ -97,20 +98,7 @@ def update_html_with_win_status_and_predict_number():
         html = html.replace("{{ need_to_be_replaced }}", "\n".join(format_buying_history))
         html = html.replace("{{ summary_tables }}", "\n".join(summary_tables))
         html = html.replace("{{ matched_distribution_tables }}", "\n".join(matched_distribution_tables))
-        nav_links = (
-            '<a href="freq_simulation_1_year.html">1Y Freq Sim</a> | '
-            '<a href="freq_simulation_2_year.html">2Y Freq Sim</a> | '
-            '<a href="freq_simulation_3_year.html">3Y Freq Sim</a> | '
-            '<a href="freq_simulation_4_year.html">4Y Freq Sim</a> | '
-            '<a href="freq_simulation_5_year.html">5Y Freq Sim</a> | '
-            '<a href="freq_simulation_all_years.html">All Freq Sim</a><br>'
-            '<a href="least_freq_simulation_1_year.html">1Y Least Freq Sim</a> | '
-            '<a href="least_freq_simulation_2_year.html">2Y Least Freq Sim</a> | '
-            '<a href="least_freq_simulation_3_year.html">3Y Least Freq Sim</a> | '
-            '<a href="least_freq_simulation_4_year.html">4Y Least Freq Sim</a> | '
-            '<a href="least_freq_simulation_5_year.html">5Y Least Freq Sim</a> | '
-            '<a href="least_freq_simulation_all_years.html">All Least Freq Sim</a>'
-        )
+        nav_links = '<a href="simulations_summary.html">Simulations Summary</a>'
         html = html.replace("{{ nav_links }}", nav_links)
     with open("docs/index.html", "w") as f:
         f.write(html)
@@ -118,6 +106,7 @@ def update_html_with_win_status_and_predict_number():
     # also build the frequency-weighted simulation pages
     generate_freq_sim_html()
     generate_least_freq_sim_html()
+    generate_simulations_summary_html()
 
 
 def auto_purchase_lotto(last_lotto_date, number, source="LLM"):

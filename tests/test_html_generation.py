@@ -69,12 +69,13 @@ def html_files(tmp_path, monkeypatch):
         tmp_dir / "docs" / "freq_simulation_all_years.html",
         tmp_dir / "docs" / "least_freq_simulation.html",
         tmp_dir / "docs" / "least_freq_simulation_all_years.html",
+        tmp_dir / "docs" / "simulations_summary.html",
         tmp_dir / "data" / "lotto.db",
     )
 
 
 def test_index_html_generation(html_files):
-    index_path, _, _, _, _, db_path = html_files
+    index_path, _, _, _, _, _, db_path = html_files
     assert index_path.exists(), "index.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -97,12 +98,12 @@ def test_index_html_generation(html_files):
     assert cells[1] == latest_row[1]
     assert cells[2].startswith(latest_row[2].split()[0])
     assert cells[4] == latest_row[3]
-    # ensure navigation contains a link to the all-year simulation page
-    assert soup.find("a", href="freq_simulation_all_years.html") is not None
+    # ensure navigation contains a link to the simulations summary page
+    assert soup.find("a", href="simulations_summary.html") is not None
 
 
 def test_freq_simulation_html_generation(html_files):
-    _, freq_path, _, _, _, db_path = html_files
+    _, freq_path, _, _, _, _, db_path = html_files
     assert freq_path.exists(), "freq_simulation.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -123,7 +124,7 @@ def test_freq_simulation_html_generation(html_files):
 
 
 def test_freq_simulation_all_years_html_generation(html_files):
-    _, _, all_path, _, _, db_path = html_files
+    _, _, all_path, _, _, _, db_path = html_files
     assert all_path.exists(), "freq_simulation_all_years.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -145,7 +146,7 @@ def test_freq_simulation_all_years_html_generation(html_files):
 
 
 def test_least_freq_simulation_html_generation(html_files):
-    _, _, _, least_path, _, db_path = html_files
+    _, _, _, least_path, _, _, db_path = html_files
     assert least_path.exists(), "least_freq_simulation.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -166,7 +167,7 @@ def test_least_freq_simulation_html_generation(html_files):
 
 
 def test_least_freq_simulation_all_years_html_generation(html_files):
-    _, _, _, _, least_all_path, db_path = html_files
+    _, _, _, _, least_all_path, _, db_path = html_files
     assert least_all_path.exists(), "least_freq_simulation_all_years.html should be generated"
 
     conn = sqlite3.connect(db_path)
@@ -185,3 +186,12 @@ def test_least_freq_simulation_all_years_html_generation(html_files):
     assert len(rows) == expected_rows
     first_cells = [c.get_text(strip=True) for c in rows[0].find_all("td")]
     assert first_cells[-1] == "LFREQ"
+
+
+def test_simulations_summary_html_generation(html_files):
+    _, _, _, _, _, summary_path, _ = html_files
+    assert summary_path.exists(), "simulations_summary.html should be generated"
+
+    soup = BeautifulSoup(summary_path.read_text(), "html.parser")
+    assert soup.find("h2", string=lambda x: x and "Frequency Weighted" in x)
+    assert soup.find("h2", string=lambda x: x and "Least Frequency" in x)
