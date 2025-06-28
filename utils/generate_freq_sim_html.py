@@ -77,7 +77,7 @@ def freq_predict(db, predictor, current_date, years=2):
     return [int(n) for n in result_str.split("-")]
 
 
-def generate_html_for_year(db, rows, years):
+def generate_html_for_year(db, rows, years, *, return_data: bool = False):
     result_rows = []
     total_win_numbers = 0
     distribution = {i: 0 for i in range(7)}
@@ -150,7 +150,10 @@ def generate_html_for_year(db, rows, years):
     template_path = os.path.join(root, 'docs', 'index_template.html')
     with open(template_path, 'r') as f:
         html = f.read()
-    html = html.replace('Historical Lotto Results', f'Frequency Weighted Simulation ({years_label})')
+    html = html.replace(
+        'Historical Lotto Results',
+        f'Frequency Weighted Simulation ({years_label})',
+    )
     nav_links = (
         '<a href="freq_simulation_1_year.html">1Y Freq Sim</a> | '
         '<a href="freq_simulation_2_year.html">2Y Freq Sim</a> | '
@@ -168,11 +171,17 @@ def generate_html_for_year(db, rows, years):
     )
     html = html.replace('{{ nav_links }}', nav_links)
     html = html.replace('LLM Predict Results', 'Number Frequency (Top 10)')
-    html = html.replace('{{ summary_tables }}', '\n'.join(summary_html))
-    html = html.replace('{{ matched_distribution_tables }}', '\n'.join(distribution_html))
+    html = html.replace('{{ summary_tables }}', '')
+    html = html.replace('{{ matched_distribution_tables }}', '')
+    html = html.replace('<h2>Summary</h2>', '')
+    html = html.replace('<h3>Matched Count Distribution</h3>', '')
     html = html.replace('{{ need_to_be_replaced }}', '\n'.join(result_rows))
 
-    out_name = f'freq_simulation_{years}_year.html' if years is not None else 'freq_simulation_all_years.html'
+    out_name = (
+        f'freq_simulation_{years}_year.html'
+        if years is not None
+        else 'freq_simulation_all_years.html'
+    )
     out_path = os.path.join(root, 'docs', out_name)
     with open(out_path, 'w') as f:
         f.write(html)
@@ -182,6 +191,8 @@ def generate_html_for_year(db, rows, years):
         with open(legacy_path, 'w') as f:
             f.write(html)
 
+    if return_data:
+        return out_path, ''.join(summary_html), ''.join(distribution_html)
     return out_path
 
 
