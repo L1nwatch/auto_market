@@ -203,3 +203,9 @@ def test_simulations_summary_html_generation(html_files):
     )
     assert len(freq_headings) == 6
     assert len(least_headings) == 6
+
+    labels = soup.find_all(
+        "h3",
+        string=lambda x: x and ("FREQ-" in x or "LFREQ-" in x),
+    )
+    assert not labels
