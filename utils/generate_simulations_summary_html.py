@@ -41,6 +41,9 @@ def main() -> str:
             with open(path, "r") as f:
                 html = f.read()
             heading = _extract_heading(html)
+            match = re.match(r"(.*) \(([^)]+)\)", heading)
+            if match:
+                heading = f"({match.group(2)}){match.group(1).strip()}"
             content = _strip_labels(summary)
             if dist:
                 content += "\n<h3>Matched Count Distribution</h3>\n" + _strip_labels(dist)
