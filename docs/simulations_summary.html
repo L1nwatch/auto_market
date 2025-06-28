@@ -61,7 +61,10 @@
                 padding: 5px;
             }
         }
-    </style>
+    
+.summary-sections{display:flex;flex-wrap:wrap;gap:20px;}
+.summary-sections section{flex:1 1 300px;}
+</style>
 </head>
 <body>
 <header>
@@ -69,7 +72,7 @@
     <nav><a href="freq_simulation_1_year.html">1Y Freq Sim</a> | <a href="freq_simulation_2_year.html">2Y Freq Sim</a> | <a href="freq_simulation_3_year.html">3Y Freq Sim</a> | <a href="freq_simulation_4_year.html">4Y Freq Sim</a> | <a href="freq_simulation_5_year.html">5Y Freq Sim</a> | <a href="freq_simulation_all_years.html">All Freq Sim</a><br><a href="least_freq_simulation_1_year.html">1Y Least Freq Sim</a> | <a href="least_freq_simulation_2_year.html">2Y Least Freq Sim</a> | <a href="least_freq_simulation_3_year.html">3Y Least Freq Sim</a> | <a href="least_freq_simulation_4_year.html">4Y Least Freq Sim</a> | <a href="least_freq_simulation_5_year.html">5Y Least Freq Sim</a> | <a href="least_freq_simulation_all_years.html">All Least Freq Sim</a> | <a href="index.html">Back to Results</a></nav>
 </header>
 <main>
-    <section>
+    <div class="summary-sections"><section>
         <h2>Frequency Weighted Simulation (1Y)</h2>
         <h2>Summary</h2>
     <h3>FREQ-1Y</h3>
@@ -117,8 +120,8 @@
     <h3>Matched Count Distribution</h3>
     <h3>FREQ-ALL</h3>
 <table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody><tr><td>0</td><td>20</td><td>46.51%</td></tr><tr><td>1</td><td>12</td><td>27.91%</td></tr><tr><td>2</td><td>9</td><td>20.93%</td></tr><tr><td>3</td><td>2</td><td>4.65%</td></tr><tr><td>4</td><td>0</td><td>0.00%</td></tr><tr><td>5</td><td>0</td><td>0.00%</td></tr><tr><td>6</td><td>0</td><td>0.00%</td></tr></tbody></table>
-    </section>
-    <section>
+    </section></div>
+    <div class="summary-sections"><section>
         <h2>Least Frequency Weighted Simulation (1Y)</h2>
         <h2>Summary</h2>
     <h3>LFREQ-1Y</h3>
@@ -166,7 +169,7 @@
     <h3>Matched Count Distribution</h3>
     <h3>LFREQ-ALL</h3>
 <table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody><tr><td>0</td><td>15</td><td>34.88%</td></tr><tr><td>1</td><td>17</td><td>39.53%</td></tr><tr><td>2</td><td>10</td><td>23.26%</td></tr><tr><td>3</td><td>1</td><td>2.33%</td></tr><tr><td>4</td><td>0</td><td>0.00%</td></tr><tr><td>5</td><td>0</td><td>0.00%</td></tr><tr><td>6</td><td>0</td><td>0.00%</td></tr></tbody></table>
-    </section>
+    </section></div>
 </main>
 </body>
 </html>
