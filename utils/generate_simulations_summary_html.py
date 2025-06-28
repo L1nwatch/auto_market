@@ -19,21 +19,27 @@ def _extract_heading(html: str) -> str:
 
 def main() -> str:
     docs_dir = os.path.join(common.root, "docs")
-    freq_path = os.path.join(docs_dir, "freq_simulation.html")
-    least_path = os.path.join(docs_dir, "least_freq_simulation.html")
 
-    with open(freq_path, "r") as f:
-        freq_html = f.read()
-    with open(least_path, "r") as f:
-        least_html = f.read()
+    def build_sections(prefix: str) -> list[str]:
+        sections = []
+        for years in [1, 2, 3, 4, 5, "all"]:
+            suffix = f"{years}_year" if years != "all" else "all_years"
+            path = os.path.join(docs_dir, f"{prefix}_{suffix}.html")
+            with open(path, "r") as f:
+                html = f.read()
+            heading = _extract_heading(html)
+            section = _extract_section(html)
+            sections.append(f"<section>\n        <h2>{heading}</h2>\n        {section}\n    </section>")
+        return sections
 
-    style_match = re.search(r"<style>(.*?)</style>", freq_html, re.S)
+    # Use the 2 year frequency simulation to obtain common styles
+    with open(os.path.join(docs_dir, "freq_simulation.html"), "r") as f:
+        style_html = f.read()
+    style_match = re.search(r"<style>(.*?)</style>", style_html, re.S)
     style = style_match.group(1) if style_match else ""
 
-    freq_heading = _extract_heading(freq_html)
-    least_heading = _extract_heading(least_html)
-    freq_section = _extract_section(freq_html)
-    least_section = _extract_section(least_html)
+    freq_sections = build_sections("freq_simulation")
+    least_sections = build_sections("least_freq_simulation")
 
     nav_links = (
         '<a href="freq_simulation_1_year.html">1Y Freq Sim</a> | '
@@ -65,14 +71,8 @@ def main() -> str:
     <nav>{nav_links}</nav>
 </header>
 <main>
-    <section>
-        <h2>{freq_heading}</h2>
-        {freq_section}
-    </section>
-    <section>
-        <h2>{least_heading}</h2>
-        {least_section}
-    </section>
+    {"".join(freq_sections)}
+    {"".join(least_sections)}
 </main>
 </body>
 </html>

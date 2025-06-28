@@ -193,5 +193,13 @@ def test_simulations_summary_html_generation(html_files):
     assert summary_path.exists(), "simulations_summary.html should be generated"
 
     soup = BeautifulSoup(summary_path.read_text(), "html.parser")
-    assert soup.find("h2", string=lambda x: x and "Frequency Weighted" in x)
-    assert soup.find("h2", string=lambda x: x and "Least Frequency" in x)
+    freq_headings = soup.find_all(
+        "h2",
+        string=lambda x: x and "Frequency Weighted" in x and "Least" not in x,
+    )
+    least_headings = soup.find_all(
+        "h2",
+        string=lambda x: x and "Least Frequency Weighted" in x,
+    )
+    assert len(freq_headings) == 6
+    assert len(least_headings) == 6
