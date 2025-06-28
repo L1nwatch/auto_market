@@ -121,7 +121,7 @@ def generate_html_for_year(db, rows, years):
         )
     distribution_html = [f"<h3>LFREQ-{years_label}</h3>"]
     distribution_html.append(
-        "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody>"
+        "<table class=\"distribution-table\"><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody>"
         + ''.join(distribution_rows) + "</tbody></table>"
     )
 

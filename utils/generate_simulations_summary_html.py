@@ -8,7 +8,7 @@ import utils.common as common
 
 
 def _extract_section(html: str) -> str:
-    match = re.search(r"(<h2>Summary.*?)(?:<h2>Results|</main>)", html, re.S)
+    match = re.search(r"<h2>Summary</h2>(.*?)(?:<h2>Results|</main>)", html, re.S)
     return match.group(1).strip() if match else ""
 
 
@@ -40,6 +40,10 @@ def main() -> str:
     style += (
         "\n.summary-sections{display:flex;flex-wrap:nowrap;gap:20px;overflow-x:auto;}"
         "\n.summary-sections section{flex:0 0 300px;}"
+        "\n.distribution-table{table-layout:fixed;width:100%;}"
+        "\n.distribution-table th:nth-child(1), .distribution-table td:nth-child(1){width:33%;}"
+        "\n.distribution-table th:nth-child(2), .distribution-table td:nth-child(2){width:33%;}"
+        "\n.distribution-table th:nth-child(3), .distribution-table td:nth-child(3){width:34%;}"
         "\n"
     )
 
