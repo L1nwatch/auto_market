@@ -10,11 +10,12 @@ import json
 from utils.common import logger
 from utils.llm_predict import LargeLanguageModel
 from utils.random_predict import RandomLottoNumberGenerator
-from utils.frequency_predict import FrequencyWeightedPredictor
+from utils.frequency_predict import FrequencyWeightedPredictor, LeastFrequencyWeightedPredictor
 from utils.collect_history_winner import history_year, current_year
 from utils.custom_db import MyLottoDB
 from utils.purchase_lotto_tickets import do_buying
 from utils.generate_freq_sim_html import main as generate_freq_sim_html
+from utils.generate_least_freq_sim_html import main as generate_least_freq_sim_html
 
 __author__ = '__L1n__w@tch'
 
@@ -102,14 +103,16 @@ def update_html_with_win_status_and_predict_number():
             '<a href="freq_simulation_3_year.html">3Y Freq Sim</a> | '
             '<a href="freq_simulation_4_year.html">4Y Freq Sim</a> | '
             '<a href="freq_simulation_5_year.html">5Y Freq Sim</a> | '
-            '<a href="freq_simulation_all_years.html">All Freq Sim</a>'
+            '<a href="freq_simulation_all_years.html">All Freq Sim</a> | '
+            '<a href="least_freq_simulation_all_years.html">All Least Freq Sim</a>'
         )
         html = html.replace("{{ nav_links }}", nav_links)
     with open("docs/index.html", "w") as f:
         f.write(html)
 
-    # also build the frequency-weighted simulation page
+    # also build the frequency-weighted simulation pages
     generate_freq_sim_html()
+    generate_least_freq_sim_html()
 
 
 def auto_purchase_lotto(last_lotto_date, number, source="LLM"):
@@ -163,6 +166,10 @@ def predict_next_lotto(last_lotto_date, source="LLM"):
         return generator.predict(last_lotto_date)
     if source.upper() == "FREQ":
         generator = FrequencyWeightedPredictor()
+        reference_date = datetime.datetime.strptime(last_lotto_date, "%Y-%m-%d").date()
+        return generator.predict(reference_date)
+    if source.upper() == "LFREQ":
+        generator = LeastFrequencyWeightedPredictor()
         reference_date = datetime.datetime.strptime(last_lotto_date, "%Y-%m-%d").date()
         return generator.predict(reference_date)
 

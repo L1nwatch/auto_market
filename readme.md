@@ -28,6 +28,7 @@ The available predictors include:
 1. **LLM** - a language model suggests numbers based on recent draws.
 2. **Random** - generates purely random combinations.
 3. **Frequency-weighted** - analyzes historical draws to select the most common numbers. Simulations are available for 1–5 years of history.
+4. **Least frequency-weighted** - selects numbers that appear the least often in historical draws.
 
 The purchased tickets and their results are displayed on GitHub Pages.
 [https://l1nwatch.github.io/auto_market/](https://l1nwatch.github.io/auto_market/)
@@ -39,6 +40,14 @@ You can also view the frequency-weighted simulation results here:
 [4 Years](https://l1nwatch.github.io/auto_market/freq_simulation_4_year.html) |
 [5 Years](https://l1nwatch.github.io/auto_market/freq_simulation_5_year.html) |
 [All Years](https://l1nwatch.github.io/auto_market/freq_simulation_all_years.html)
+
+You can view the least frequency-weighted simulation results here:
+[1 Year](https://l1nwatch.github.io/auto_market/least_freq_simulation_1_year.html) |
+[2 Years](https://l1nwatch.github.io/auto_market/least_freq_simulation_2_year.html) |
+[3 Years](https://l1nwatch.github.io/auto_market/least_freq_simulation_3_year.html) |
+[4 Years](https://l1nwatch.github.io/auto_market/least_freq_simulation_4_year.html) |
+[5 Years](https://l1nwatch.github.io/auto_market/least_freq_simulation_5_year.html) |
+[All Years](https://l1nwatch.github.io/auto_market/least_freq_simulation_all_years.html)
 
 
 ### Design Overview
