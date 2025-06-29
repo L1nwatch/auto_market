@@ -52,21 +52,25 @@ def update_html_with_win_status_and_predict_number():
                 group_summary[source]["distribution"][count] += 1
 
     # build summary and distribution tables
-    summary_tables = []
-    matched_distribution_tables = []
+    summary_table_sections = []
+    distribution_table_sections = []
     for source, data in group_summary.items():
-        summary_tables.append(f"<h3>{source}</h3>")
+        # build summary table for a source
+        section_parts = [f"<h3>{source}</h3>"]
         avg_hit_rate = 0
         if data["total_tickets"] > 0:
             avg_hit_rate = data["total_win_numbers"] / (data["total_tickets"] * 6)
 
-        summary_tables.append(
+        section_parts.append(
             f"<table><tr><th>Total Tickets Bought</th><td>{data['total_tickets']}</td></tr>"
             f"<tr><th>Total Win Numbers</th><td>{data['total_win_numbers']}</td></tr>"
             f"<tr><th>Average Hit Rate</th><td>{avg_hit_rate:.2%}</td></tr></table>"
         )
+        summary_table_sections.append("<div>" + "".join(section_parts) + "</div>")
 
-        matched_distribution_tables.append(f"<h3>{source}</h3>")
+        # build matched distribution table for a source
+        dist_parts = [f"<h3>{source}</h3>"]
+        avg_hit_rate = 0
         resolved_tickets = sum(data["distribution"].values())
         rows = []
         for i in range(7):
@@ -76,10 +80,23 @@ def update_html_with_win_status_and_predict_number():
             rows.append(
                 f"<tr><td>{i}</td><td>{data['distribution'][i]}</td><td>{hit_rate:.2%}</td></tr>"
             )
-        matched_distribution_tables.append(
+        dist_parts.append(
             "<table><thead><tr><th>Matched Numbers</th><th>Ticket Count</th><th>Hit Rate</th></tr></thead><tbody>"
-            + "".join(rows) + "</tbody></table>"
+            + "".join(rows)
+            + "</tbody></table>"
         )
+        distribution_table_sections.append("<div>" + "".join(dist_parts) + "</div>")
+
+    summary_tables = (
+        '<div style="display:flex;gap:20px;flex-wrap:wrap;">'
+        + "".join(summary_table_sections)
+        + "</div>"
+    )
+    matched_distribution_tables = (
+        '<div style="display:flex;gap:20px;flex-wrap:wrap;">'
+        + "".join(distribution_table_sections)
+        + "</div>"
+    )
 
     # format buying history
     format_buying_history = []
@@ -96,8 +113,8 @@ def update_html_with_win_status_and_predict_number():
     with open("docs/index_template.html", "r") as f:
         html = f.read()
         html = html.replace("{{ need_to_be_replaced }}", "\n".join(format_buying_history))
-        html = html.replace("{{ summary_tables }}", "\n".join(summary_tables))
-        html = html.replace("{{ matched_distribution_tables }}", "\n".join(matched_distribution_tables))
+        html = html.replace("{{ summary_tables }}", summary_tables)
+        html = html.replace("{{ matched_distribution_tables }}", matched_distribution_tables)
         nav_links = '<a href="simulations_summary.html">Simulations Summary</a>'
         html = html.replace("{{ nav_links }}", nav_links)
     with open("docs/index.html", "w") as f:
