@@ -151,7 +151,7 @@ def generate_html_for_year(db, rows, years, *, return_data: bool = False):
         '<a href="index.html">Back to Results</a>'
     )
     html = html.replace('{{ nav_links }}', nav_links)
-    html = html.replace('LLM Predict Results', 'Number Frequency (Bottom 10)')
+    html = html.replace('Predict Results', 'Number Frequency (Bottom 10)')
     html = html.replace('{{ summary_tables }}', '')
     html = html.replace('{{ matched_distribution_tables }}', '')
     html = html.replace('<h2>Summary</h2>', '')
